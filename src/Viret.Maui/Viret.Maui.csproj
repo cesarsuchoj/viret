@@ -15,7 +15,7 @@
     <ApplicationVersion>1</ApplicationVersion>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 
-    <!-- Avoid failing solution-wide test/build on SDK 10 due net8 mobile workload EOL checks. -->
+    <!-- Avoid failing solution-wide test/build on .NET SDK 10 due to .NET 8 mobile workload EOL checks. -->
     <CheckEolWorkloads>false</CheckEolWorkloads>
   </PropertyGroup>
 
