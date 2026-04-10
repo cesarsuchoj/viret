@@ -24,19 +24,17 @@ public class TransactionRepository : ITransactionRepository
 
     public async Task<decimal> GetBalanceByFamilyIdAsync(int familyId)
     {
-        var transactions = await _context.Transactions
-            .Where(t => t.FamilyId == familyId)
-            .ToListAsync();
+        var income = (await _context.Transactions
+            .Where(t => t.FamilyId == familyId && t.Type == TransactionType.Income)
+            .Select(t => (double?)t.Amount)
+            .SumAsync()) ?? 0d;
 
-        var income = transactions
-            .Where(t => t.Type == TransactionType.Income)
-            .Sum(t => t.Amount);
+        var expense = (await _context.Transactions
+            .Where(t => t.FamilyId == familyId && t.Type == TransactionType.Expense)
+            .Select(t => (double?)t.Amount)
+            .SumAsync()) ?? 0d;
 
-        var expense = transactions
-            .Where(t => t.Type == TransactionType.Expense)
-            .Sum(t => t.Amount);
-
-        return income - expense;
+        return (decimal)(income - expense);
     }
 
     public async Task AddAsync(Transaction entity)
