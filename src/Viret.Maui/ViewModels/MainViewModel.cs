@@ -8,7 +8,6 @@ namespace Viret.Maui.ViewModels;
 public partial class MainViewModel : BaseViewModel
 {
     private readonly ITransactionService _transactionService;
-    private readonly int _familyId;
 
     [ObservableProperty]
     private decimal _balance;
@@ -16,10 +15,12 @@ public partial class MainViewModel : BaseViewModel
     [ObservableProperty]
     private IEnumerable<Transaction> _transactions = Enumerable.Empty<Transaction>();
 
+    [ObservableProperty]
+    private int _familyId;
+
     public MainViewModel(ITransactionService transactionService)
     {
         _transactionService = transactionService;
-        _familyId = 1;
         Title = "Viret – Gestão Financeira";
     }
 
@@ -32,8 +33,8 @@ public partial class MainViewModel : BaseViewModel
         IsBusy = true;
         try
         {
-            Transactions = await _transactionService.GetTransactionsByFamilyAsync(_familyId);
-            Balance = await _transactionService.GetBalanceAsync(_familyId);
+            Transactions = await _transactionService.GetTransactionsByFamilyAsync(FamilyId);
+            Balance = await _transactionService.GetBalanceAsync(FamilyId);
         }
         finally
         {
