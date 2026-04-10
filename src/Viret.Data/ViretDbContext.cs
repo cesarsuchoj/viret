@@ -13,6 +13,9 @@ public class ViretDbContext : DbContext
     public DbSet<Family> Families => Set<Family>();
     public DbSet<User> Users => Set<User>();
     public DbSet<FamilyMember> FamilyMembers => Set<FamilyMember>();
+    public DbSet<BudgetCategory> BudgetCategories => Set<BudgetCategory>();
+    public DbSet<Income> Incomes => Set<Income>();
+    public DbSet<Expense> Expenses => Set<Expense>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -56,6 +59,61 @@ public class ViretDbContext : DbContext
                 .WithMany(f => f.Members)
                 .HasForeignKey(fm => fm.FamilyId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<BudgetCategory>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Name).IsRequired().HasMaxLength(100);
+            entity.Property(c => c.PlannedLimit).HasPrecision(18, 2);
+            entity.HasOne(c => c.Family)
+                .WithMany(f => f.BudgetCategories)
+                .HasForeignKey(c => c.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(c => c.User)
+                .WithMany(u => u.BudgetCategories)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Income>(entity =>
+        {
+            entity.HasKey(i => i.Id);
+            entity.Property(i => i.Description).IsRequired().HasMaxLength(200);
+            entity.Property(i => i.PlannedAmount).HasPrecision(18, 2);
+            entity.Property(i => i.ActualAmount).HasPrecision(18, 2);
+            entity.HasOne(i => i.Family)
+                .WithMany(f => f.Incomes)
+                .HasForeignKey(i => i.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(i => i.User)
+                .WithMany(u => u.Incomes)
+                .HasForeignKey(i => i.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(i => i.BudgetCategory)
+                .WithMany(c => c.Incomes)
+                .HasForeignKey(i => i.BudgetCategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<Expense>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.PlannedAmount).HasPrecision(18, 2);
+            entity.Property(e => e.ActualAmount).HasPrecision(18, 2);
+            entity.HasOne(e => e.Family)
+                .WithMany(f => f.Expenses)
+                .HasForeignKey(e => e.FamilyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.Expenses)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.BudgetCategory)
+                .WithMany(c => c.Expenses)
+                .HasForeignKey(e => e.BudgetCategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

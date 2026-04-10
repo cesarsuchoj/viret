@@ -44,6 +44,42 @@
 | `FamilyId` | `INTEGER` | PK composta, FK -> `Families.Id`, delete cascade |
 | `Role` | `INTEGER` | obrigatório (`FamilyRole`) |
 
+### `BudgetCategories`
+
+| Coluna | Tipo | Restrições |
+|---|---|---|
+| `Id` | `INTEGER` | PK, autoincrement |
+| `Name` | `TEXT` | obrigatório, máximo 100 |
+| `PlannedLimit` | `TEXT` | obrigatório, precisão 18,2 |
+| `FamilyId` | `INTEGER` | FK -> `Families.Id`, delete cascade |
+| `UserId` | `INTEGER` | FK -> `Users.Id`, delete cascade |
+
+### `Incomes`
+
+| Coluna | Tipo | Restrições |
+|---|---|---|
+| `Id` | `INTEGER` | PK, autoincrement |
+| `Description` | `TEXT` | obrigatório, máximo 200 |
+| `PlannedAmount` | `TEXT` | obrigatório, precisão 18,2 |
+| `ActualAmount` | `TEXT` | obrigatório, precisão 18,2 |
+| `Date` | `TEXT` | obrigatório |
+| `FamilyId` | `INTEGER` | FK -> `Families.Id`, delete cascade |
+| `UserId` | `INTEGER` | FK -> `Users.Id`, delete cascade |
+| `BudgetCategoryId` | `INTEGER` | FK opcional -> `BudgetCategories.Id`, delete set null |
+
+### `Expenses`
+
+| Coluna | Tipo | Restrições |
+|---|---|---|
+| `Id` | `INTEGER` | PK, autoincrement |
+| `Description` | `TEXT` | obrigatório, máximo 200 |
+| `PlannedAmount` | `TEXT` | obrigatório, precisão 18,2 |
+| `ActualAmount` | `TEXT` | obrigatório, precisão 18,2 |
+| `Date` | `TEXT` | obrigatório |
+| `FamilyId` | `INTEGER` | FK -> `Families.Id`, delete cascade |
+| `UserId` | `INTEGER` | FK -> `Users.Id`, delete cascade |
+| `BudgetCategoryId` | `INTEGER` | FK opcional -> `BudgetCategories.Id`, delete set null |
+
 ## Seed inicial
 
 Dados de exemplo inseridos na inicialização (`InitializeViretData(seedSampleData: true)`) quando o banco está vazio:
