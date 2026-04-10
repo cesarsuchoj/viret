@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Viret.Core\Viret.Core.csproj" />
+    <ProjectReference Include="..\..\src\Viret.Data\Viret.Data.csproj" />
   </ItemGroup>
 
 </Project>

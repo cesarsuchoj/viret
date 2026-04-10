@@ -6,9 +6,9 @@ namespace Viret.Data.Repositories;
 
 public class TransactionRepository : ITransactionRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ViretDbContext _context;
 
-    public TransactionRepository(AppDbContext context)
+    public TransactionRepository(ViretDbContext context)
     {
         _context = context;
     }
@@ -24,15 +24,20 @@ public class TransactionRepository : ITransactionRepository
 
     public async Task<decimal> GetBalanceByFamilyIdAsync(int familyId)
     {
-        var income = await _context.Transactions
-            .Where(t => t.FamilyId == familyId && t.Type == TransactionType.Income)
-            .SumAsync(t => t.Amount);
+        var balanceInCents = await _context.Database
+            .SqlQuery<long>($"""
+                SELECT COALESCE(SUM(
+                    CASE
+                        WHEN Type = {(int)TransactionType.Income} THEN CAST(ROUND(Amount * 100, 0) AS INTEGER)
+                        ELSE -CAST(ROUND(Amount * 100, 0) AS INTEGER)
+                    END
+                ), 0)
+                FROM Transactions
+                WHERE FamilyId = {familyId}
+                """)
+            .SingleAsync();
 
-        var expense = await _context.Transactions
-            .Where(t => t.FamilyId == familyId && t.Type == TransactionType.Expense)
-            .SumAsync(t => t.Amount);
-
-        return income - expense;
+        return balanceInCents / 100m;
     }
 
     public async Task AddAsync(Transaction entity)
