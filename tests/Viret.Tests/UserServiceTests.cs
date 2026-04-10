@@ -56,6 +56,42 @@ public class UserServiceTests
     }
 
     [Fact]
+    public async Task LoginAsync_WithHashFromRegister_Succeeds()
+    {
+        var usersByEmail = new Dictionary<string, User>(StringComparer.OrdinalIgnoreCase);
+
+        _userRepositoryMock.Setup(r => r.GetByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync((string email) =>
+            {
+                usersByEmail.TryGetValue(email, out var user);
+                return user;
+            });
+
+        _userRepositoryMock.Setup(r => r.AddAsync(It.IsAny<User>()))
+            .Callback<User>(user =>
+            {
+                user.Id = 7;
+                usersByEmail[user.Email] = user;
+            })
+            .Returns(Task.CompletedTask);
+
+        await _sut.RegisterAsync("Ana", "ana@example.com", "Senha123");
+        var authenticated = await _sut.LoginAsync("ana@example.com", "Senha123");
+
+        Assert.Equal(7, authenticated.Id);
+        Assert.Equal("ana@example.com", authenticated.Email);
+    }
+
+    [Fact]
+    public async Task LoginAsync_MalformedIterationsInHash_ThrowsUnauthorizedAccessException()
+    {
+        _userRepositoryMock.Setup(r => r.GetByEmailAsync("ana@example.com"))
+            .ReturnsAsync(new User { Id = 1, Email = "ana@example.com", PasswordHash = "0.AQIDBA==.AQIDBA==" });
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _sut.LoginAsync("ana@example.com", "Senha123"));
+    }
+
+    [Fact]
     public async Task AddUserToFamilyAsync_DuplicateAssociation_ThrowsInvalidOperationException()
     {
         _userRepositoryMock.Setup(r => r.GetByIdAsync(1))

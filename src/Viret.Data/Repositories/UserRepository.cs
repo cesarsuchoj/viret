@@ -27,7 +27,21 @@ public class UserRepository : IUserRepository
     public async Task AddAsync(User entity)
     {
         await _context.Users.AddAsync(entity);
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex)
+        {
+            _context.Entry(entity).State = EntityState.Detached;
+
+            if (await _context.Users.AnyAsync(u => u.Email == entity.Email))
+            {
+                throw new InvalidOperationException("Email is already registered.", ex);
+            }
+
+            throw;
+        }
     }
 
     public async Task UpdateAsync(User entity)

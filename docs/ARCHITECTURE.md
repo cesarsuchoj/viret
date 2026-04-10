@@ -27,7 +27,7 @@ Contém a **lógica de negócio central** do sistema. Não possui dependências 
 | Pasta | Conteúdo |
 |---|---|
 | `Models/` | Entidades do domínio (`Transaction`, `Family`, `User`, `FamilyMember`, `TransactionType`, `FamilyRole`) |
-| `Interfaces/` | Contratos para repositórios e serviços (`IRepository<T>`, `ITransactionRepository`, `IFamilyRepository`, `IUserRepository`, `IFamilyMemberRepository`, `ITransactionService`, `IFamilyService`, `IUserService`) |
+| `Interfaces/` | Contratos para repositórios e serviços (`IRepository<TEntity, TId>`, `ITransactionRepository`, `IFamilyRepository`, `IUserRepository`, `IFamilyMemberRepository`, `ITransactionService`, `IFamilyService`, `IUserService`) |
 | `Services/` | Implementações da lógica de negócio (`TransactionService`, `FamilyService`, `UserService`) |
 
 ### `Viret.Data`
@@ -47,7 +47,7 @@ Camada de **interface de usuário** construída com .NET MAUI seguindo o padrão
 |---|---|
 | `MauiProgram.cs` | Ponto de entrada; configura o `MauiApp` e registra todos os serviços via DI |
 | `ViewModels/` | `BaseViewModel`, `MainViewModel`, `LoginViewModel`, `RegisterViewModel`, `FamilySelectionViewModel` |
-| `Views/` | Páginas XAML ligadas aos ViewModels |
+| `Views/` | Páginas MAUI (XAML e/ou C#) ligadas aos ViewModels |
 
 ### `Viret.Tests`
 Testes unitários com **xUnit** e **Moq**. Cobrem os serviços de negócio da camada `Viret.Core`.
@@ -57,7 +57,7 @@ Testes unitários com **xUnit** e **Moq**. Cobrem os serviços de negócio da ca
 ## Padrões de Projeto Utilizados
 
 ### MVVM (Model-View-ViewModel)
-- **View**: páginas XAML, sem lógica de negócio
+- **View**: páginas MAUI (XAML e/ou C#), sem lógica de negócio
 - **ViewModel**: herda de `BaseViewModel` (`ObservableObject`); expõe propriedades observáveis via `[ObservableProperty]` e comandos via `[RelayCommand]` (CommunityToolkit.Mvvm)
 - **Model**: entidades em `Viret.Core.Models`
 

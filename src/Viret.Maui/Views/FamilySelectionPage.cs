@@ -10,7 +10,7 @@ public class FamilySelectionPage : ContentPage
         SetBinding(TitleProperty, nameof(FamilySelectionViewModel.Title));
 
         var userIdEntry = new Entry { Placeholder = "ID do usuário", Keyboard = Keyboard.Numeric };
-        userIdEntry.SetBinding(Entry.TextProperty, nameof(FamilySelectionViewModel.UserId));
+        userIdEntry.SetBinding(Entry.TextProperty, nameof(FamilySelectionViewModel.UserIdText));
 
         var loadButton = new Button { Text = "Carregar famílias" };
         loadButton.SetBinding(Button.CommandProperty, nameof(FamilySelectionViewModel.LoadFamiliesCommand));

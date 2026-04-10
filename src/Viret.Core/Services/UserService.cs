@@ -9,6 +9,8 @@ public class UserService : IUserService
     private const int SaltSize = 16;
     private const int HashSize = 32;
     private const int Iterations = 100_000;
+    private const int MinIterations = 10_000;
+    private const int MaxIterations = 1_000_000;
 
     private readonly IUserRepository _userRepository;
     private readonly IFamilyRepository _familyRepository;
@@ -115,6 +117,8 @@ public class UserService : IUserService
         var parts = storedHash.Split('.', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 3 || !int.TryParse(parts[0], out var iterations))
             return false;
+        if (iterations < MinIterations || iterations > MaxIterations)
+            return false;
 
         byte[] salt;
         byte[] expectedHash;
@@ -122,13 +126,26 @@ public class UserService : IUserService
         {
             salt = Convert.FromBase64String(parts[1]);
             expectedHash = Convert.FromBase64String(parts[2]);
+            if (salt.Length == 0 || expectedHash.Length == 0)
+                return false;
         }
         catch (FormatException)
         {
             return false;
         }
 
-        var computedHash = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, HashAlgorithmName.SHA256, expectedHash.Length);
-        return CryptographicOperations.FixedTimeEquals(computedHash, expectedHash);
+        try
+        {
+            var computedHash = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, HashAlgorithmName.SHA256, expectedHash.Length);
+            return CryptographicOperations.FixedTimeEquals(computedHash, expectedHash);
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+        catch (CryptographicException)
+        {
+            return false;
+        }
     }
 }

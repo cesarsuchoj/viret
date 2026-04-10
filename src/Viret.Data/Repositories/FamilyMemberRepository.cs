@@ -28,7 +28,23 @@ public class FamilyMemberRepository : IFamilyMemberRepository
     public async Task AddAsync(FamilyMember familyMember)
     {
         await _context.FamilyMembers.AddAsync(familyMember);
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex)
+        {
+            _context.Entry(familyMember).State = EntityState.Detached;
+
+            if (await ExistsAsync(familyMember.UserId, familyMember.FamilyId))
+            {
+                throw new InvalidOperationException(
+                    $"The user with ID {familyMember.UserId} is already associated with the family with ID {familyMember.FamilyId}.",
+                    ex);
+            }
+
+            throw;
+        }
     }
 
     public Task<bool> ExistsAsync(int userId, int familyId)

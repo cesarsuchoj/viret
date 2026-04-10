@@ -13,6 +13,9 @@ public partial class FamilySelectionViewModel : BaseViewModel
     private int _userId;
 
     [ObservableProperty]
+    private string _userIdText = string.Empty;
+
+    [ObservableProperty]
     private IEnumerable<Family> _families = Enumerable.Empty<Family>();
 
     [ObservableProperty]
@@ -36,12 +39,20 @@ public partial class FamilySelectionViewModel : BaseViewModel
         if (IsBusy)
             return;
 
+        if (!TryParseUserId(out var parsedUserId))
+        {
+            ErrorMessage = "Informe um ID de usuário válido.";
+            Families = Enumerable.Empty<Family>();
+            return;
+        }
+
         IsBusy = true;
         ErrorMessage = string.Empty;
 
         try
         {
-            Families = await _userService.GetFamiliesForUserAsync(UserId);
+            UserId = parsedUserId;
+            Families = await _userService.GetFamiliesForUserAsync(parsedUserId);
         }
         catch (Exception ex)
         {
@@ -56,6 +67,13 @@ public partial class FamilySelectionViewModel : BaseViewModel
     [RelayCommand]
     private async Task SelectFamilyAsync()
     {
+        if (!TryParseUserId(out var parsedUserId))
+        {
+            HasAccessToSelectedFamily = false;
+            ErrorMessage = "Informe um ID de usuário válido.";
+            return;
+        }
+
         if (SelectedFamily is null)
         {
             HasAccessToSelectedFamily = false;
@@ -64,6 +82,18 @@ public partial class FamilySelectionViewModel : BaseViewModel
         }
 
         ErrorMessage = string.Empty;
-        HasAccessToSelectedFamily = await _userService.UserHasAccessToFamilyAsync(UserId, SelectedFamily.Id);
+        UserId = parsedUserId;
+        HasAccessToSelectedFamily = await _userService.UserHasAccessToFamilyAsync(parsedUserId, SelectedFamily.Id);
+    }
+
+    private bool TryParseUserId(out int parsedUserId)
+    {
+        if (!int.TryParse(UserIdText, out parsedUserId))
+        {
+            parsedUserId = 0;
+            return false;
+        }
+
+        return parsedUserId > 0;
     }
 }
