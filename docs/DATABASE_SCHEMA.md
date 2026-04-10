@@ -29,8 +29,8 @@
 
 ## Seed inicial
 
-Dados de exemplo inseridos na inicialização (`InitializeViretData`) quando o banco está vazio:
+Dados de exemplo inseridos na inicialização (`InitializeViretData(seedSampleData: true)`) quando o banco está vazio:
 
-- Família `Família Exemplo` (`Id = 1`)
+- Família `Família Exemplo`
 - Transação de receita: `Salário`, `3500`
 - Transação de despesa: `Mercado`, `420`

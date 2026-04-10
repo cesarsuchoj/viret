@@ -9,7 +9,7 @@ namespace Viret.Tests;
 public class LocalPersistenceTests
 {
     [Fact]
-    public async Task InitializeViretData_AppliesMigrationsAndSeedsData()
+    public async Task InitializeViretData_WithSeedEnabled_AppliesMigrationsAndSeedsData()
     {
         var dbPath = Path.Combine(Path.GetTempPath(), $"viret-{Guid.NewGuid():N}.db");
 
@@ -19,7 +19,7 @@ public class LocalPersistenceTests
             services.AddViretData(dbPath);
 
             using var serviceProvider = services.BuildServiceProvider();
-            serviceProvider.InitializeViretData();
+            serviceProvider.InitializeViretData(seedSampleData: true);
 
             using var scope = serviceProvider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ViretDbContext>();
@@ -49,6 +49,12 @@ public class LocalPersistenceTests
 
             using var serviceProvider = services.BuildServiceProvider();
             serviceProvider.InitializeViretData();
+
+            using (var initialScope = serviceProvider.CreateScope())
+            {
+                var dbContext = initialScope.ServiceProvider.GetRequiredService<ViretDbContext>();
+                Assert.False(await dbContext.Families.AnyAsync());
+            }
 
             using (var writeScope = serviceProvider.CreateScope())
             {

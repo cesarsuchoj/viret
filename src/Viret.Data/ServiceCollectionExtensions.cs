@@ -19,12 +19,16 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static void InitializeViretData(this IServiceProvider serviceProvider)
+    public static void InitializeViretData(this IServiceProvider serviceProvider, bool seedSampleData = false)
     {
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ViretDbContext>();
         dbContext.Database.Migrate();
-        SeedIfNeeded(dbContext);
+
+        if (seedSampleData)
+        {
+            SeedIfNeeded(dbContext);
+        }
     }
 
     private static void SeedIfNeeded(ViretDbContext dbContext)
