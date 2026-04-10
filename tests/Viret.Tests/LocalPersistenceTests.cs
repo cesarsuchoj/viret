@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Data.Sqlite;
 using Viret.Core.Interfaces;
 using Viret.Core.Models;
 using Viret.Data;
@@ -18,22 +19,23 @@ public class LocalPersistenceTests
             var services = new ServiceCollection();
             services.AddViretData(dbPath);
 
-            using var serviceProvider = services.BuildServiceProvider();
-            serviceProvider.InitializeViretData(seedSampleData: true);
+            using (var serviceProvider = services.BuildServiceProvider())
+            {
+                serviceProvider.InitializeViretData(seedSampleData: true);
 
-            using var scope = serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<ViretDbContext>();
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<ViretDbContext>();
 
-            Assert.True(await dbContext.Database.CanConnectAsync());
-            Assert.True(await dbContext.Families.AnyAsync());
-            Assert.True(await dbContext.Transactions.AnyAsync());
+                    Assert.True(await dbContext.Database.CanConnectAsync());
+                    Assert.True(await dbContext.Families.AnyAsync());
+                    Assert.True(await dbContext.Transactions.AnyAsync());
+                }
+            }
         }
         finally
         {
-            if (File.Exists(dbPath))
-            {
-                File.Delete(dbPath);
-            }
+            TryDeleteDatabaseFile(dbPath);
         }
     }
 
@@ -47,51 +49,69 @@ public class LocalPersistenceTests
             var services = new ServiceCollection();
             services.AddViretData(dbPath);
 
-            using var serviceProvider = services.BuildServiceProvider();
-            serviceProvider.InitializeViretData();
-
-            using (var initialScope = serviceProvider.CreateScope())
+            using (var serviceProvider = services.BuildServiceProvider())
             {
-                var dbContext = initialScope.ServiceProvider.GetRequiredService<ViretDbContext>();
-                Assert.False(await dbContext.Families.AnyAsync());
-            }
+                serviceProvider.InitializeViretData();
 
-            using (var writeScope = serviceProvider.CreateScope())
-            {
-                var familyRepository = writeScope.ServiceProvider.GetRequiredService<IFamilyRepository>();
-                var transactionRepository = writeScope.ServiceProvider.GetRequiredService<ITransactionRepository>();
-
-                var family = new Family { Name = "Família Persistência" };
-                await familyRepository.AddAsync(family);
-
-                await transactionRepository.AddAsync(new Transaction
+                using (var initialScope = serviceProvider.CreateScope())
                 {
-                    Description = "Conta de luz",
-                    Amount = 180m,
-                    Date = DateTime.Today,
-                    Type = TransactionType.Expense,
-                    FamilyId = family.Id
-                });
-            }
+                    var dbContext = initialScope.ServiceProvider.GetRequiredService<ViretDbContext>();
+                    Assert.False(await dbContext.Families.AnyAsync());
+                }
 
-            using (var readScope = serviceProvider.CreateScope())
-            {
-                var transactionRepository = readScope.ServiceProvider.GetRequiredService<ITransactionRepository>();
-                var familyRepository = readScope.ServiceProvider.GetRequiredService<IFamilyRepository>();
+                using (var writeScope = serviceProvider.CreateScope())
+                {
+                    var familyRepository = writeScope.ServiceProvider.GetRequiredService<IFamilyRepository>();
+                    var transactionRepository = writeScope.ServiceProvider.GetRequiredService<ITransactionRepository>();
 
-                var family = (await familyRepository.GetAllAsync()).Single(f => f.Name == "Família Persistência");
-                var transactions = await transactionRepository.GetByFamilyIdAsync(family.Id);
+                    var family = new Family { Name = "Família Persistência" };
+                    await familyRepository.AddAsync(family);
 
-                Assert.Single(transactions);
-                Assert.Equal(-180m, await transactionRepository.GetBalanceByFamilyIdAsync(family.Id));
+                    await transactionRepository.AddAsync(new Transaction
+                    {
+                        Description = "Conta de luz",
+                        Amount = 180m,
+                        Date = DateTime.Today,
+                        Type = TransactionType.Expense,
+                        FamilyId = family.Id
+                    });
+                }
+
+                using (var readScope = serviceProvider.CreateScope())
+                {
+                    var transactionRepository = readScope.ServiceProvider.GetRequiredService<ITransactionRepository>();
+                    var familyRepository = readScope.ServiceProvider.GetRequiredService<IFamilyRepository>();
+
+                    var family = (await familyRepository.GetAllAsync()).Single(f => f.Name == "Família Persistência");
+                    var transactions = await transactionRepository.GetByFamilyIdAsync(family.Id);
+
+                    Assert.Single(transactions);
+                    Assert.Equal(-180m, await transactionRepository.GetBalanceByFamilyIdAsync(family.Id));
+                }
             }
         }
         finally
         {
-            if (File.Exists(dbPath))
-            {
-                File.Delete(dbPath);
-            }
+            TryDeleteDatabaseFile(dbPath);
+        }
+    }
+
+    private static void TryDeleteDatabaseFile(string dbPath)
+    {
+        if (!File.Exists(dbPath))
+        {
+            return;
+        }
+
+        SqliteConnection.ClearAllPools();
+
+        try
+        {
+            File.Delete(dbPath);
+        }
+        catch (IOException)
+        {
+            // Cleanup best-effort only; do not fail functional assertions for temp file locks.
         }
     }
 }

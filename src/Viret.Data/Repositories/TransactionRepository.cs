@@ -31,7 +31,7 @@ public class TransactionRepository : ITransactionRepository
                         WHEN Type = {(int)TransactionType.Income} THEN CAST(ROUND(Amount * 100, 0) AS INTEGER)
                         ELSE -CAST(ROUND(Amount * 100, 0) AS INTEGER)
                     END
-                ), 0)
+                ), 0) AS Value
                 FROM Transactions
                 WHERE FamilyId = {familyId}
                 """)
