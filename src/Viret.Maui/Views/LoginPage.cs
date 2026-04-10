@@ -1,3 +1,5 @@
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 using Viret.Maui.ViewModels;
 
 namespace Viret.Maui.Views;
@@ -7,7 +9,7 @@ public class LoginPage : ContentPage
     public LoginPage(LoginViewModel viewModel)
     {
         BindingContext = viewModel;
-        SetBinding(TitleProperty, nameof(LoginViewModel.Title));
+        SetBinding(TitleProperty, new Binding(nameof(LoginViewModel.Title)));
 
         var emailEntry = new Entry { Placeholder = "E-mail", Keyboard = Keyboard.Email };
         emailEntry.SetBinding(Entry.TextProperty, nameof(LoginViewModel.Email));

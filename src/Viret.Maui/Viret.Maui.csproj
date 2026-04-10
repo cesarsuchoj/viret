@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst;net8.0-windows10.0.19041.0</TargetFrameworks>
+    <TargetFrameworks>net10.0-android;net10.0-ios;net10.0-maccatalyst;net10.0-windows10.0.19041.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <RootNamespace>Viret.Maui</RootNamespace>
     <UseMaui>true</UseMaui>
@@ -14,12 +14,12 @@
     <ApplicationId>com.cesarsuchoj.viret</ApplicationId>
     <ApplicationVersion>1</ApplicationVersion>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <WindowsPackageType>None</WindowsPackageType>
 
-    <!-- Avoid failing solution-wide test/build on .NET SDK 10 due to .NET 8 mobile workload EOL checks. -->
-    <CheckEolWorkloads>false</CheckEolWorkloads>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.20" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
   </ItemGroup>
 

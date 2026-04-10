@@ -1,8 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui;
+using Microsoft.Maui.Hosting;
 using Viret.Core.Interfaces;
 using Viret.Core.Services;
 using Viret.Data;
 using Viret.Maui.ViewModels;
+using Viret.Maui.Views;
 
 namespace Viret.Maui;
 
@@ -11,7 +14,7 @@ public static class MauiProgram
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
-        builder.UseMaui();
+        builder.UseMauiApp<App>();
 
         var dbPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -27,6 +30,9 @@ public static class MauiProgram
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<RegisterViewModel>();
         builder.Services.AddTransient<FamilySelectionViewModel>();
+        builder.Services.AddTransient<LoginPage>();
+        builder.Services.AddTransient<RegisterPage>();
+        builder.Services.AddTransient<FamilySelectionPage>();
 
         var app = builder.Build();
         app.Services.InitializeViretData();

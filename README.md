@@ -82,10 +82,10 @@ dotnet restore
 dotnet test
 
 # Execute a aplicação (Android)
-dotnet run --project src/Viret.Maui -f net8.0-android
+dotnet run --project src/Viret.Maui -f net10.0-android
 
 # Execute a aplicação (Windows)
-dotnet run --project src/Viret.Maui -f net8.0-windows10.0.19041.0
+dotnet run --project src/Viret.Maui -f net10.0-windows10.0.19041.0
 ```
 
 ## Contribuição

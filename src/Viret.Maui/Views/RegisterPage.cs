@@ -1,3 +1,5 @@
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 using Viret.Maui.ViewModels;
 
 namespace Viret.Maui.Views;
@@ -7,7 +9,7 @@ public class RegisterPage : ContentPage
     public RegisterPage(RegisterViewModel viewModel)
     {
         BindingContext = viewModel;
-        SetBinding(TitleProperty, nameof(RegisterViewModel.Title));
+        SetBinding(TitleProperty, new Binding(nameof(RegisterViewModel.Title)));
 
         var nameEntry = new Entry { Placeholder = "Nome" };
         nameEntry.SetBinding(Entry.TextProperty, nameof(RegisterViewModel.Name));

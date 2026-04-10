@@ -1,3 +1,5 @@
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 using Viret.Maui.ViewModels;
 
 namespace Viret.Maui.Views;
@@ -7,7 +9,7 @@ public class FamilySelectionPage : ContentPage
     public FamilySelectionPage(FamilySelectionViewModel viewModel)
     {
         BindingContext = viewModel;
-        SetBinding(TitleProperty, nameof(FamilySelectionViewModel.Title));
+        SetBinding(TitleProperty, new Binding(nameof(FamilySelectionViewModel.Title)));
 
         var userIdEntry = new Entry { Placeholder = "ID do usuário", Keyboard = Keyboard.Numeric };
         userIdEntry.SetBinding(Entry.TextProperty, nameof(FamilySelectionViewModel.UserIdText));
