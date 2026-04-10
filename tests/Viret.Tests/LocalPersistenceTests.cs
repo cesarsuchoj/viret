@@ -96,6 +96,65 @@ public class LocalPersistenceTests
         }
     }
 
+    [Fact]
+    public async Task Repositories_PersistUserFamilyAssociationAcrossScopesWithSQLite()
+    {
+        var dbPath = Path.Combine(Path.GetTempPath(), $"viret-{Guid.NewGuid():N}.db");
+
+        try
+        {
+            var services = new ServiceCollection();
+            services.AddViretData(dbPath);
+
+            using (var serviceProvider = services.BuildServiceProvider())
+            {
+                serviceProvider.InitializeViretData();
+
+                using (var writeScope = serviceProvider.CreateScope())
+                {
+                    var familyRepository = writeScope.ServiceProvider.GetRequiredService<IFamilyRepository>();
+                    var userRepository = writeScope.ServiceProvider.GetRequiredService<IUserRepository>();
+                    var familyMemberRepository = writeScope.ServiceProvider.GetRequiredService<IFamilyMemberRepository>();
+
+                    var family = new Family { Name = "Família Associação" };
+                    await familyRepository.AddAsync(family);
+
+                    var user = new User
+                    {
+                        Name = "Ana",
+                        Email = $"ana-{Guid.NewGuid():N}@example.com",
+                        PasswordHash = "hash"
+                    };
+                    await userRepository.AddAsync(user);
+
+                    await familyMemberRepository.AddAsync(new FamilyMember
+                    {
+                        UserId = user.Id,
+                        FamilyId = family.Id,
+                        Role = FamilyRole.Admin
+                    });
+                }
+
+                using (var readScope = serviceProvider.CreateScope())
+                {
+                    var userRepository = readScope.ServiceProvider.GetRequiredService<IUserRepository>();
+                    var familyMemberRepository = readScope.ServiceProvider.GetRequiredService<IFamilyMemberRepository>();
+
+                    var user = (await userRepository.GetAllAsync()).Single(u => u.Name == "Ana");
+                    var families = await familyMemberRepository.GetFamiliesByUserIdAsync(user.Id);
+
+                    var family = Assert.Single(families);
+                    Assert.Equal("Família Associação", family.Name);
+                    Assert.True(await familyMemberRepository.ExistsAsync(user.Id, family.Id));
+                }
+            }
+        }
+        finally
+        {
+            TryDeleteDatabaseFile(dbPath);
+        }
+    }
+
     private static void TryDeleteDatabaseFile(string dbPath)
     {
         if (!File.Exists(dbPath))
