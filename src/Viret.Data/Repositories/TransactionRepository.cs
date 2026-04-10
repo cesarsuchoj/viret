@@ -6,9 +6,9 @@ namespace Viret.Data.Repositories;
 
 public class TransactionRepository : ITransactionRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ViretDbContext _context;
 
-    public TransactionRepository(AppDbContext context)
+    public TransactionRepository(ViretDbContext context)
     {
         _context = context;
     }
@@ -24,13 +24,17 @@ public class TransactionRepository : ITransactionRepository
 
     public async Task<decimal> GetBalanceByFamilyIdAsync(int familyId)
     {
-        var income = await _context.Transactions
-            .Where(t => t.FamilyId == familyId && t.Type == TransactionType.Income)
-            .SumAsync(t => t.Amount);
+        var transactions = await _context.Transactions
+            .Where(t => t.FamilyId == familyId)
+            .ToListAsync();
 
-        var expense = await _context.Transactions
-            .Where(t => t.FamilyId == familyId && t.Type == TransactionType.Expense)
-            .SumAsync(t => t.Amount);
+        var income = transactions
+            .Where(t => t.Type == TransactionType.Income)
+            .Sum(t => t.Amount);
+
+        var expense = transactions
+            .Where(t => t.Type == TransactionType.Expense)
+            .Sum(t => t.Amount);
 
         return income - expense;
     }

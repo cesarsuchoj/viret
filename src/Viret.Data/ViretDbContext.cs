@@ -3,9 +3,9 @@ using Viret.Core.Models;
 
 namespace Viret.Data;
 
-public class AppDbContext : DbContext
+public class ViretDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    public ViretDbContext(DbContextOptions<ViretDbContext> options) : base(options)
     {
     }
 

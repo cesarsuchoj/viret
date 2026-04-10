@@ -13,7 +13,7 @@ O **Viret** adota uma **arquitetura em camadas** (Layered Architecture) combinad
 │   Models │ Interfaces │ Services         │
 ├──────────────────────────────────────────┤
 │         Viret.Data (Persistência)        │
-│   AppDbContext │ Repositories (EF Core)  │
+│ ViretDbContext │ Repositories (EF Core)  │
 └──────────────────────────────────────────┘
 ```
 
@@ -35,9 +35,10 @@ Responsável pela **persistência de dados** usando Entity Framework Core com SQ
 
 | Pasta / Arquivo | Conteúdo |
 |---|---|
-| `AppDbContext.cs` | Contexto EF Core com configuração das entidades |
+| `ViretDbContext.cs` | Contexto EF Core com configuração das entidades |
+| `Migrations/` | Migrações EF Core aplicadas automaticamente na inicialização |
+| `ServiceCollectionExtensions.cs` | Registro de DI, migração automática e seed inicial |
 | `Repositories/` | Implementações concretas de `ITransactionRepository` e `IFamilyRepository` |
-| `ServiceCollectionExtensions.cs` | Método de extensão `AddViretData()` para registro de DI |
 
 ### `Viret.Maui`
 Camada de **interface de usuário** construída com .NET MAUI seguindo o padrão MVVM.
@@ -90,6 +91,7 @@ Viret.Maui
 
 Viret.Tests
   └── Viret.Core
+  └── Viret.Data
 ```
 
 A camada `Viret.Core` **não depende** de nenhuma outra camada do projeto, garantindo que a lógica de negócio seja isolada e facilmente testável.

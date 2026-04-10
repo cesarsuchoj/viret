@@ -24,6 +24,9 @@ public static class MauiProgram
 
         builder.Services.AddTransient<MainViewModel>();
 
-        return builder.Build();
+        var app = builder.Build();
+        app.Services.InitializeViretData();
+
+        return app;
     }
 }

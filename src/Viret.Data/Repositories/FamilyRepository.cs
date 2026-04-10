@@ -6,9 +6,9 @@ namespace Viret.Data.Repositories;
 
 public class FamilyRepository : IFamilyRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ViretDbContext _context;
 
-    public FamilyRepository(AppDbContext context)
+    public FamilyRepository(ViretDbContext context)
     {
         _context = context;
     }
