@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Viret.Core/Viret.Core.csproj" />
+    <Project Path="src/Viret.Data/Viret.Data.csproj" />
+    <Project Path="src/Viret.Maui/Viret.Maui.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Viret.Tests/Viret.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: |
+          dotnet restore src/Viret.Core/Viret.Core.csproj
+          dotnet restore src/Viret.Data/Viret.Data.csproj
+          dotnet restore tests/Viret.Tests/Viret.Tests.csproj
+
+      - name: Build
+        run: |
+          dotnet build src/Viret.Core/Viret.Core.csproj --no-restore --configuration Release
+          dotnet build src/Viret.Data/Viret.Data.csproj --no-restore --configuration Release
+          dotnet build tests/Viret.Tests/Viret.Tests.csproj --no-restore --configuration Release
+
+      - name: Run tests
+        run: dotnet test tests/Viret.Tests/Viret.Tests.csproj --no-build --configuration Release --verbosity normal
