@@ -26,9 +26,9 @@ Contém a **lógica de negócio central** do sistema. Não possui dependências 
 
 | Pasta | Conteúdo |
 |---|---|
-| `Models/` | Entidades do domínio (`Transaction`, `Family`, `TransactionType`) |
-| `Interfaces/` | Contratos para repositórios e serviços (`IRepository<T>`, `ITransactionRepository`, `IFamilyRepository`, `ITransactionService`, `IFamilyService`) |
-| `Services/` | Implementações da lógica de negócio (`TransactionService`, `FamilyService`) |
+| `Models/` | Entidades do domínio (`Transaction`, `Family`, `User`, `FamilyMember`, `TransactionType`, `FamilyRole`) |
+| `Interfaces/` | Contratos para repositórios e serviços (`IRepository<TEntity, TId>`, `ITransactionRepository`, `IFamilyRepository`, `IUserRepository`, `IFamilyMemberRepository`, `ITransactionService`, `IFamilyService`, `IUserService`) |
+| `Services/` | Implementações da lógica de negócio (`TransactionService`, `FamilyService`, `UserService`) |
 
 ### `Viret.Data`
 Responsável pela **persistência de dados** usando Entity Framework Core com SQLite.
@@ -38,7 +38,7 @@ Responsável pela **persistência de dados** usando Entity Framework Core com SQ
 | `ViretDbContext.cs` | Contexto EF Core com configuração das entidades |
 | `Migrations/` | Migrações EF Core aplicadas automaticamente na inicialização |
 | `ServiceCollectionExtensions.cs` | Registro de DI, migração automática e seed inicial |
-| `Repositories/` | Implementações concretas de `ITransactionRepository` e `IFamilyRepository` |
+| `Repositories/` | Implementações concretas de `ITransactionRepository`, `IFamilyRepository`, `IUserRepository` e `IFamilyMemberRepository` |
 
 ### `Viret.Maui`
 Camada de **interface de usuário** construída com .NET MAUI seguindo o padrão MVVM.
@@ -46,8 +46,8 @@ Camada de **interface de usuário** construída com .NET MAUI seguindo o padrão
 | Pasta / Arquivo | Conteúdo |
 |---|---|
 | `MauiProgram.cs` | Ponto de entrada; configura o `MauiApp` e registra todos os serviços via DI |
-| `ViewModels/` | `BaseViewModel` (base ObservableObject) e `MainViewModel` |
-| `Views/` | Páginas XAML ligadas aos ViewModels |
+| `ViewModels/` | `BaseViewModel`, `MainViewModel`, `LoginViewModel`, `RegisterViewModel`, `FamilySelectionViewModel` |
+| `Views/` | Páginas MAUI (XAML e/ou C#) ligadas aos ViewModels |
 
 ### `Viret.Tests`
 Testes unitários com **xUnit** e **Moq**. Cobrem os serviços de negócio da camada `Viret.Core`.
@@ -57,12 +57,12 @@ Testes unitários com **xUnit** e **Moq**. Cobrem os serviços de negócio da ca
 ## Padrões de Projeto Utilizados
 
 ### MVVM (Model-View-ViewModel)
-- **View**: páginas XAML, sem lógica de negócio
+- **View**: páginas MAUI (XAML e/ou C#), sem lógica de negócio
 - **ViewModel**: herda de `BaseViewModel` (`ObservableObject`); expõe propriedades observáveis via `[ObservableProperty]` e comandos via `[RelayCommand]` (CommunityToolkit.Mvvm)
 - **Model**: entidades em `Viret.Core.Models`
 
 ### Repository Pattern
-Isola o acesso a dados. Os serviços dependem das interfaces `ITransactionRepository` / `IFamilyRepository`, não das implementações concretas.
+Isola o acesso a dados. Os serviços dependem das interfaces de repositório (`ITransactionRepository`, `IFamilyRepository`, `IUserRepository`, `IFamilyMemberRepository`) e não das implementações concretas.
 
 ### Dependency Injection (DI)
 A injeção de dependências é configurada em `MauiProgram.cs` usando o contêiner nativo do .NET (`Microsoft.Extensions.DependencyInjection`):
@@ -74,9 +74,13 @@ builder.Services.AddViretData(dbPath);
 // Serviços de negócio
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IFamilyService, FamilyService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // ViewModels
 builder.Services.AddTransient<MainViewModel>();
+builder.Services.AddTransient<LoginViewModel>();
+builder.Services.AddTransient<RegisterViewModel>();
+builder.Services.AddTransient<FamilySelectionViewModel>();
 ```
 
 ---

@@ -21,8 +21,12 @@ public static class MauiProgram
 
         builder.Services.AddScoped<ITransactionService, TransactionService>();
         builder.Services.AddScoped<IFamilyService, FamilyService>();
+        builder.Services.AddScoped<IUserService, UserService>();
 
         builder.Services.AddTransient<MainViewModel>();
+        builder.Services.AddTransient<LoginViewModel>();
+        builder.Services.AddTransient<RegisterViewModel>();
+        builder.Services.AddTransient<FamilySelectionViewModel>();
 
         var app = builder.Build();
         app.Services.InitializeViretData();
