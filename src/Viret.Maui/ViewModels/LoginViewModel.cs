@@ -32,13 +32,25 @@ public partial class LoginViewModel : BaseViewModel
         if (IsBusy)
             return;
 
+        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+        {
+            ErrorMessage = "Informe e-mail e senha.";
+            AuthenticatedUserId = null;
+            return;
+        }
+
         IsBusy = true;
         ErrorMessage = string.Empty;
+        AuthenticatedUserId = null;
 
         try
         {
             var user = await _userService.LoginAsync(Email, Password);
             AuthenticatedUserId = user.Id;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            ErrorMessage = "E-mail ou senha invalidos.";
         }
         catch (Exception ex)
         {

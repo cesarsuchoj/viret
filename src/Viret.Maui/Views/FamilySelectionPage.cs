@@ -6,7 +6,7 @@ namespace Viret.Maui.Views;
 
 public class FamilySelectionPage : ContentPage
 {
-    public FamilySelectionPage(FamilySelectionViewModel viewModel)
+    public FamilySelectionPage(FamilySelectionViewModel viewModel, MainPage mainPage)
     {
         BindingContext = viewModel;
         SetBinding(TitleProperty, new Binding(nameof(FamilySelectionViewModel.Title)));
@@ -22,8 +22,30 @@ public class FamilySelectionPage : ContentPage
         picker.ItemDisplayBinding = new Binding("Name");
         picker.SetBinding(Picker.SelectedItemProperty, nameof(FamilySelectionViewModel.SelectedFamily));
 
+        var noFamilyLabel = new Label { Text = "Nenhuma família encontrada para este usuário." };
+        noFamilyLabel.SetBinding(IsVisibleProperty, nameof(FamilySelectionViewModel.ShowCreateFamilyOption));
+
+        var newFamilyNameEntry = new Entry { Placeholder = "Nome da nova família" };
+        newFamilyNameEntry.SetBinding(Entry.TextProperty, nameof(FamilySelectionViewModel.NewFamilyName));
+        newFamilyNameEntry.SetBinding(IsVisibleProperty, nameof(FamilySelectionViewModel.ShowCreateFamilyOption));
+
+        var createFamilyButton = new Button { Text = "Criar nova família" };
+        createFamilyButton.SetBinding(Button.CommandProperty, nameof(FamilySelectionViewModel.CreateFamilyCommand));
+        createFamilyButton.SetBinding(IsVisibleProperty, nameof(FamilySelectionViewModel.ShowCreateFamilyOption));
+
         var selectButton = new Button { Text = "Entrar na família" };
-        selectButton.SetBinding(Button.CommandProperty, nameof(FamilySelectionViewModel.SelectFamilyCommand));
+        selectButton.Clicked += async (_, _) =>
+        {
+            await viewModel.SelectFamilyCommand.ExecuteAsync(null);
+
+            if (viewModel.HasAccessToSelectedFamily && viewModel.SelectedFamily is not null)
+            {
+                if (mainPage.BindingContext is MainViewModel mainViewModel)
+                    mainViewModel.FamilyId = viewModel.SelectedFamily.Id;
+
+                await Navigation.PushAsync(mainPage);
+            }
+        };
 
         var accessLabel = new Label();
         accessLabel.SetBinding(Label.TextProperty, nameof(FamilySelectionViewModel.HasAccessToSelectedFamily), stringFormat: "Acesso autorizado: {0}");
@@ -35,7 +57,7 @@ public class FamilySelectionPage : ContentPage
         {
             Padding = 24,
             Spacing = 12,
-            Children = { userIdEntry, loadButton, picker, selectButton, accessLabel, errorLabel }
+            Children = { userIdEntry, loadButton, picker, noFamilyLabel, newFamilyNameEntry, createFamilyButton, selectButton, accessLabel, errorLabel }
         };
     }
 }

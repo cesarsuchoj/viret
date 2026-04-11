@@ -33,6 +33,7 @@ public static class MauiProgram
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<RegisterPage>();
         builder.Services.AddTransient<FamilySelectionPage>();
+        builder.Services.AddTransient<MainPage>();
 
         var app = builder.Build();
         app.Services.InitializeViretData();

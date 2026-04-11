@@ -6,7 +6,7 @@ namespace Viret.Maui.Views;
 
 public class LoginPage : ContentPage
 {
-    public LoginPage(LoginViewModel viewModel)
+    public LoginPage(LoginViewModel viewModel, RegisterPage registerPage, FamilySelectionPage familySelectionPage)
     {
         BindingContext = viewModel;
         SetBinding(TitleProperty, new Binding(nameof(LoginViewModel.Title)));
@@ -18,7 +18,25 @@ public class LoginPage : ContentPage
         passwordEntry.SetBinding(Entry.TextProperty, nameof(LoginViewModel.Password));
 
         var loginButton = new Button { Text = "Entrar" };
-        loginButton.SetBinding(Button.CommandProperty, nameof(LoginViewModel.LoginCommand));
+        loginButton.Clicked += async (_, _) =>
+        {
+            await viewModel.LoginCommand.ExecuteAsync(null);
+
+            if (viewModel.AuthenticatedUserId is int userId)
+            {
+                if (familySelectionPage.BindingContext is FamilySelectionViewModel familySelectionViewModel)
+                    familySelectionViewModel.UserIdText = userId.ToString();
+
+                await Navigation.PushAsync(familySelectionPage);
+            }
+        };
+
+        var registerButton = new Button { Text = "Criar conta" };
+        registerButton.Clicked += async (_, _) => await Navigation.PushAsync(registerPage);
+
+        var loadingIndicator = new ActivityIndicator();
+        loadingIndicator.SetBinding(ActivityIndicator.IsRunningProperty, nameof(LoginViewModel.IsBusy));
+        loadingIndicator.SetBinding(ActivityIndicator.IsVisibleProperty, nameof(LoginViewModel.IsBusy));
 
         var errorLabel = new Label { TextColor = Colors.Red };
         errorLabel.SetBinding(Label.TextProperty, nameof(LoginViewModel.ErrorMessage));
@@ -27,7 +45,7 @@ public class LoginPage : ContentPage
         {
             Padding = 24,
             Spacing = 12,
-            Children = { emailEntry, passwordEntry, loginButton, errorLabel }
+            Children = { emailEntry, passwordEntry, loginButton, registerButton, loadingIndicator, errorLabel }
         };
     }
 }
