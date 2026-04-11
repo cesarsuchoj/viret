@@ -27,13 +27,13 @@ public class BudgetPlanningPage : ContentPage
         var startDateLabel = new Label { Text = "Data inicial" };
         var startDatePicker = new DatePicker();
         startDatePicker.SetBinding(DatePicker.DateProperty, nameof(BudgetPlanningViewModel.StartDate));
-        AutomationProperties.SetName(startDatePicker, "Data inicial");
+        startDatePicker.SetValue(AutomationProperties.LabeledByProperty, startDateLabel);
         AutomationProperties.SetHelpText(startDatePicker, "Selecione a data inicial do filtro");
 
         var endDateLabel = new Label { Text = "Data final" };
         var endDatePicker = new DatePicker();
         endDatePicker.SetBinding(DatePicker.DateProperty, nameof(BudgetPlanningViewModel.EndDate));
-        AutomationProperties.SetName(endDatePicker, "Data final");
+        endDatePicker.SetValue(AutomationProperties.LabeledByProperty, endDateLabel);
         AutomationProperties.SetHelpText(endDatePicker, "Selecione a data final do filtro");
 
         var snapshotCountEntry = new Entry { Placeholder = "Qtd. de snapshots", Keyboard = Keyboard.Numeric };

@@ -219,15 +219,15 @@ public class FinancialPlanningService : IFinancialPlanningService
 
         var minDate = new[]
         {
-            incomesWithValidDates.Any() ? incomesWithValidDates.Min(i => i.Date).Date : (DateTime?)null,
-            expensesWithValidDates.Any() ? expensesWithValidDates.Min(e => e.Date).Date : (DateTime?)null,
+            GetMinDate(incomesWithValidDates, income => income.Date),
+            GetMinDate(expensesWithValidDates, expense => expense.Date),
             startDate?.Date
         }.Where(date => date.HasValue).Select(date => date!.Value).DefaultIfEmpty(DateTime.Today).Min();
 
         var maxDate = new[]
         {
-            incomesWithValidDates.Any() ? incomesWithValidDates.Max(i => i.Date).Date : (DateTime?)null,
-            expensesWithValidDates.Any() ? expensesWithValidDates.Max(e => e.Date).Date : (DateTime?)null,
+            GetMaxDate(incomesWithValidDates, income => income.Date),
+            GetMaxDate(expensesWithValidDates, expense => expense.Date),
             endDate?.Date
         }.Where(date => date.HasValue).Select(date => date!.Value).DefaultIfEmpty(DateTime.Today).Max();
 
@@ -268,6 +268,22 @@ public class FinancialPlanningService : IFinancialPlanningService
 
         return periods;
     }
+
+    private static DateTime? GetMinDate<TTransaction>(
+        IReadOnlyCollection<TTransaction> transactions,
+        Func<TTransaction, DateTime> selector)
+        where TTransaction : class
+        => transactions.Count == 0
+            ? null
+            : selector(transactions.MinBy(selector)!).Date;
+
+    private static DateTime? GetMaxDate<TTransaction>(
+        IReadOnlyCollection<TTransaction> transactions,
+        Func<TTransaction, DateTime> selector)
+        where TTransaction : class
+        => transactions.Count == 0
+            ? null
+            : selector(transactions.MaxBy(selector)!).Date;
 
     private static int GetUserId<TTransaction>(TTransaction transaction)
         where TTransaction : class
