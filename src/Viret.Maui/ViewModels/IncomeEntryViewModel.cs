@@ -62,9 +62,9 @@ public partial class IncomeEntryViewModel : BaseViewModel
         {
             Categories = await _financialPlanningService.GetBudgetCategoriesByFamilyAsync(familyId);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = "Não foi possível carregar as categorias de orçamento.";
         }
     }
 

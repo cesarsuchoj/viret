@@ -6,6 +6,8 @@ namespace Viret.Maui.Views;
 
 public class BudgetPlanningPage : ContentPage
 {
+    private const string SeparatorText = " | ";
+
     public BudgetPlanningPage(BudgetPlanningViewModel viewModel)
     {
         BindingContext = viewModel;
@@ -69,11 +71,11 @@ public class BudgetPlanningPage : ContentPage
                     Children =
                     {
                         categoryNameLabel,
-                        new Label { Text = " | " },
+                        new Label { Text = SeparatorText },
                         plannedLimitLabel,
-                        new Label { Text = " | " },
+                        new Label { Text = SeparatorText },
                         plannedExpenseItemLabel,
-                        new Label { Text = " | " },
+                        new Label { Text = SeparatorText },
                         actualExpenseItemLabel
                     }
                 };
