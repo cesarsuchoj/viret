@@ -47,6 +47,9 @@ public partial class FamilySelectionViewModel : BaseViewModel
         if (IsBusy)
             return;
 
+        ShowCreateFamilyOption = false;
+        SelectedFamily = null;
+
         if (!TryParseUserId(out var parsedUserId))
         {
             ErrorMessage = "Informe um ID de usuário válido.";
@@ -100,7 +103,7 @@ public partial class FamilySelectionViewModel : BaseViewModel
         HasAccessToSelectedFamily = await _userService.UserHasAccessToFamilyAsync(parsedUserId, SelectedFamily.Id);
 
         if (!HasAccessToSelectedFamily)
-            ErrorMessage = "Sem acesso a família selecionada.";
+            ErrorMessage = "Sem acesso à família selecionada.";
     }
 
     [RelayCommand]

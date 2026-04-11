@@ -23,15 +23,15 @@ public class FamilySelectionPage : ContentPage
         picker.SetBinding(Picker.SelectedItemProperty, nameof(FamilySelectionViewModel.SelectedFamily));
 
         var noFamilyLabel = new Label { Text = "Nenhuma família encontrada para este usuário." };
-        noFamilyLabel.SetBinding(IsVisibleProperty, nameof(FamilySelectionViewModel.ShowCreateFamilyOption));
+        noFamilyLabel.SetBinding(VisualElement.IsVisibleProperty, nameof(FamilySelectionViewModel.ShowCreateFamilyOption));
 
         var newFamilyNameEntry = new Entry { Placeholder = "Nome da nova família" };
         newFamilyNameEntry.SetBinding(Entry.TextProperty, nameof(FamilySelectionViewModel.NewFamilyName));
-        newFamilyNameEntry.SetBinding(IsVisibleProperty, nameof(FamilySelectionViewModel.ShowCreateFamilyOption));
+        newFamilyNameEntry.SetBinding(VisualElement.IsVisibleProperty, nameof(FamilySelectionViewModel.ShowCreateFamilyOption));
 
         var createFamilyButton = new Button { Text = "Criar nova família" };
         createFamilyButton.SetBinding(Button.CommandProperty, nameof(FamilySelectionViewModel.CreateFamilyCommand));
-        createFamilyButton.SetBinding(IsVisibleProperty, nameof(FamilySelectionViewModel.ShowCreateFamilyOption));
+        createFamilyButton.SetBinding(VisualElement.IsVisibleProperty, nameof(FamilySelectionViewModel.ShowCreateFamilyOption));
 
         var selectButton = new Button { Text = "Entrar na família" };
         selectButton.Clicked += async (_, _) =>

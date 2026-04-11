@@ -18,6 +18,9 @@ public partial class MainViewModel : BaseViewModel
     [ObservableProperty]
     private int _familyId;
 
+    [ObservableProperty]
+    private string _familyIdText = string.Empty;
+
     public MainViewModel(ITransactionService transactionService)
     {
         _transactionService = transactionService;
@@ -40,5 +43,28 @@ public partial class MainViewModel : BaseViewModel
         {
             IsBusy = false;
         }
+    }
+
+    partial void OnFamilyIdChanged(int value)
+    {
+        var valueText = value.ToString();
+        if (!string.Equals(FamilyIdText, valueText, StringComparison.Ordinal))
+            FamilyIdText = valueText;
+    }
+
+    partial void OnFamilyIdTextChanged(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            if (FamilyId != 0)
+                FamilyId = 0;
+            return;
+        }
+
+        if (!int.TryParse(value, out var parsedFamilyId) || parsedFamilyId <= 0)
+            return;
+
+        if (FamilyId != parsedFamilyId)
+            FamilyId = parsedFamilyId;
     }
 }

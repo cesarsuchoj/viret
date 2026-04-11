@@ -50,7 +50,7 @@ public partial class LoginViewModel : BaseViewModel
         }
         catch (UnauthorizedAccessException)
         {
-            ErrorMessage = "E-mail ou senha invalidos.";
+            ErrorMessage = "E-mail ou senha inválidos.";
         }
         catch (Exception ex)
         {

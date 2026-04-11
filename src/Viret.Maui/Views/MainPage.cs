@@ -11,7 +11,7 @@ public class MainPage : ContentPage
         SetBinding(TitleProperty, new Binding(nameof(MainViewModel.Title)));
 
         var familyIdEntry = new Entry { Placeholder = "ID da família", Keyboard = Keyboard.Numeric };
-        familyIdEntry.SetBinding(Entry.TextProperty, nameof(MainViewModel.FamilyId));
+        familyIdEntry.SetBinding(Entry.TextProperty, nameof(MainViewModel.FamilyIdText));
 
         var loadButton = new Button { Text = "Atualizar dados" };
         loadButton.SetBinding(Button.CommandProperty, nameof(MainViewModel.LoadDataCommand));
