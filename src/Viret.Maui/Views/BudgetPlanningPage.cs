@@ -19,6 +19,28 @@ public class BudgetPlanningPage : ContentPage
         var userIdEntry = new Entry { Placeholder = "ID do usuário", Keyboard = Keyboard.Numeric };
         userIdEntry.SetBinding(Entry.TextProperty, nameof(BudgetPlanningViewModel.UserIdText));
 
+        var reportUserIdEntry = new Entry { Placeholder = "Filtrar por usuário (opcional)", Keyboard = Keyboard.Numeric };
+        reportUserIdEntry.SetBinding(Entry.TextProperty, nameof(BudgetPlanningViewModel.ReportUserIdText));
+        AutomationProperties.SetName(reportUserIdEntry, "Filtro por usuário");
+        AutomationProperties.SetHelpText(reportUserIdEntry, "Informe o ID do usuário para filtrar o relatório");
+
+        var startDateLabel = new Label { Text = "Data inicial" };
+        var startDatePicker = new DatePicker();
+        startDatePicker.SetBinding(DatePicker.DateProperty, nameof(BudgetPlanningViewModel.StartDate));
+        startDatePicker.SetValue(AutomationProperties.LabeledByProperty, startDateLabel);
+        AutomationProperties.SetHelpText(startDatePicker, "Selecione a data inicial do filtro");
+
+        var endDateLabel = new Label { Text = "Data final" };
+        var endDatePicker = new DatePicker();
+        endDatePicker.SetBinding(DatePicker.DateProperty, nameof(BudgetPlanningViewModel.EndDate));
+        endDatePicker.SetValue(AutomationProperties.LabeledByProperty, endDateLabel);
+        AutomationProperties.SetHelpText(endDatePicker, "Selecione a data final do filtro");
+
+        var snapshotCountEntry = new Entry { Placeholder = "Qtd. de snapshots", Keyboard = Keyboard.Numeric };
+        snapshotCountEntry.SetBinding(Entry.TextProperty, nameof(BudgetPlanningViewModel.SnapshotCountText));
+        AutomationProperties.SetName(snapshotCountEntry, "Quantidade de snapshots");
+        AutomationProperties.SetHelpText(snapshotCountEntry, "Informe quantos snapshots históricos devem ser exibidos");
+
         var categoryNameEntry = new Entry { Placeholder = "Nova categoria" };
         categoryNameEntry.SetBinding(Entry.TextProperty, nameof(BudgetPlanningViewModel.CategoryName));
 
@@ -83,6 +105,69 @@ public class BudgetPlanningPage : ContentPage
         };
         categoryList.SetBinding(ItemsView.ItemsSourceProperty, nameof(BudgetPlanningViewModel.CategorySummaries));
 
+        var periodChartTitleLabel = new Label { Text = "Gráfico de ganhos x gastos por período" };
+        var periodChartList = new CollectionView();
+        periodChartList.SetBinding(ItemsView.ItemsSourceProperty, nameof(BudgetPlanningViewModel.PeriodChartLines));
+        periodChartList.ItemTemplate = new DataTemplate(() =>
+        {
+            var lineLabel = new Label
+            {
+                FontFamily = "Courier New",
+                LineBreakMode = LineBreakMode.WordWrap
+            };
+            lineLabel.SetBinding(Label.TextProperty, ".");
+            return lineLabel;
+        });
+
+        var periodList = new CollectionView
+        {
+            ItemTemplate = new DataTemplate(() =>
+            {
+                var periodLabel = new Label();
+                periodLabel.SetBinding(Label.TextProperty, nameof(Viret.Core.Models.BudgetPeriodSummary.PeriodLabel));
+
+                var availableLabel = new Label();
+                availableLabel.SetBinding(Label.TextProperty, nameof(Viret.Core.Models.BudgetPeriodSummary.ActualAvailable), stringFormat: "Saldo: {0:C}");
+
+                return new HorizontalStackLayout
+                {
+                    Spacing = 8,
+                    Children =
+                    {
+                        periodLabel,
+                        new Label { Text = SeparatorText },
+                        availableLabel
+                    }
+                };
+            })
+        };
+        periodList.SetBinding(ItemsView.ItemsSourceProperty, nameof(BudgetPlanningViewModel.PeriodSummaries));
+
+        var snapshotTitleLabel = new Label { Text = "Snapshots históricos" };
+        var snapshotList = new CollectionView
+        {
+            ItemTemplate = new DataTemplate(() =>
+            {
+                var labelLabel = new Label();
+                labelLabel.SetBinding(Label.TextProperty, nameof(Viret.Core.Models.BudgetSnapshot.Label));
+
+                var snapshotBalanceLabel = new Label();
+                snapshotBalanceLabel.SetBinding(Label.TextProperty, nameof(Viret.Core.Models.BudgetSnapshot.ActualAvailable), stringFormat: "Saldo efetivo: {0:C}");
+
+                return new HorizontalStackLayout
+                {
+                    Spacing = 8,
+                    Children =
+                    {
+                        labelLabel,
+                        new Label { Text = SeparatorText },
+                        snapshotBalanceLabel
+                    }
+                };
+            })
+        };
+        snapshotList.SetBinding(ItemsView.ItemsSourceProperty, nameof(BudgetPlanningViewModel.Snapshots));
+
         var successLabel = new Label { TextColor = Colors.Green };
         successLabel.SetBinding(Label.TextProperty, nameof(BudgetPlanningViewModel.SuccessMessage));
 
@@ -97,9 +182,10 @@ public class BudgetPlanningPage : ContentPage
                 Spacing = 12,
                 Children =
                 {
-                    familyIdEntry, userIdEntry, categoryNameEntry, categoryLimitEntry, createCategoryButton, loadButton,
+                    familyIdEntry, userIdEntry, reportUserIdEntry, startDateLabel, startDatePicker, endDateLabel, endDatePicker, snapshotCountEntry,
+                    categoryNameEntry, categoryLimitEntry, createCategoryButton, loadButton,
                     plannedIncomeLabel, actualIncomeLabel, plannedExpenseLabel, actualExpenseLabel, plannedAvailableLabel, actualAvailableLabel,
-                    categoryList, successLabel, errorLabel
+                    periodChartTitleLabel, periodChartList, periodList, categoryList, snapshotTitleLabel, snapshotList, successLabel, errorLabel
                 }
             }
         };

@@ -17,6 +17,9 @@ public partial class BudgetPlanningViewModel : BaseViewModel
     private string _userIdText = string.Empty;
 
     [ObservableProperty]
+    private string _reportUserIdText = string.Empty;
+
+    [ObservableProperty]
     private string _categoryName = string.Empty;
 
     [ObservableProperty]
@@ -44,6 +47,24 @@ public partial class BudgetPlanningViewModel : BaseViewModel
     private IEnumerable<BudgetCategorySummary> _categorySummaries = Enumerable.Empty<BudgetCategorySummary>();
 
     [ObservableProperty]
+    private IEnumerable<BudgetPeriodSummary> _periodSummaries = Enumerable.Empty<BudgetPeriodSummary>();
+
+    [ObservableProperty]
+    private IEnumerable<string> _periodChartLines = Enumerable.Empty<string>();
+
+    [ObservableProperty]
+    private IEnumerable<BudgetSnapshot> _snapshots = Enumerable.Empty<BudgetSnapshot>();
+
+    [ObservableProperty]
+    private DateTime _startDate = DateTime.Today.AddMonths(-5);
+
+    [ObservableProperty]
+    private DateTime _endDate = DateTime.Today;
+
+    [ObservableProperty]
+    private string _snapshotCountText = "6";
+
+    [ObservableProperty]
     private string _errorMessage = string.Empty;
 
     [ObservableProperty]
@@ -52,7 +73,7 @@ public partial class BudgetPlanningViewModel : BaseViewModel
     public BudgetPlanningViewModel(IFinancialPlanningService financialPlanningService)
     {
         _financialPlanningService = financialPlanningService;
-        Title = "Orçamento e Planejamento";
+        Title = "Dashboard Financeiro";
     }
 
     [RelayCommand]
@@ -123,7 +144,37 @@ public partial class BudgetPlanningViewModel : BaseViewModel
 
         try
         {
-            var overview = await _financialPlanningService.GetBudgetOverviewAsync(userId, familyId);
+            if (!TryParseSnapshotCount(out var snapshotCount))
+            {
+                ErrorMessage = "Informe uma quantidade válida de snapshots.";
+                return;
+            }
+
+            if (StartDate.Date > EndDate.Date)
+            {
+                ErrorMessage = "A data inicial não pode ser maior que a data final.";
+                return;
+            }
+
+            int? filteredUserId = null;
+            if (!string.IsNullOrWhiteSpace(ReportUserIdText))
+            {
+                if (!TryParseReportUserId(out var parsedReportUserId))
+                {
+                    ErrorMessage = "Informe um filtro de usuário válido.";
+                    return;
+                }
+
+                filteredUserId = parsedReportUserId;
+            }
+
+            var overview = await _financialPlanningService.GetBudgetOverviewAsync(
+                userId,
+                familyId,
+                StartDate.Date,
+                EndDate.Date,
+                filteredUserId,
+                snapshotCount);
             PlannedIncome = overview.PlannedIncome;
             ActualIncome = overview.ActualIncome;
             PlannedExpense = overview.PlannedExpense;
@@ -131,6 +182,9 @@ public partial class BudgetPlanningViewModel : BaseViewModel
             PlannedAvailable = overview.PlannedAvailable;
             ActualAvailable = overview.ActualAvailable;
             CategorySummaries = overview.CategorySummaries;
+            PeriodSummaries = overview.PeriodSummaries;
+            Snapshots = overview.Snapshots;
+            PeriodChartLines = BuildChartLines(overview.PeriodSummaries);
         }
         catch (Exception ex)
         {
@@ -144,8 +198,47 @@ public partial class BudgetPlanningViewModel : BaseViewModel
 
     private bool TryParseFamilyId(out int familyId) => int.TryParse(FamilyIdText, out familyId) && familyId > 0;
     private bool TryParseUserId(out int userId) => int.TryParse(UserIdText, out userId) && userId > 0;
+    private bool TryParseReportUserId(out int userId) => int.TryParse(ReportUserIdText, out userId) && userId > 0;
+    private bool TryParseSnapshotCount(out int snapshotCount) => int.TryParse(SnapshotCountText, out snapshotCount) && snapshotCount > 0;
 
     private static bool TryParseAmount(string text, out decimal value)
         => decimal.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out value) ||
            decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out value);
+
+    private static IReadOnlyCollection<string> BuildChartLines(IEnumerable<BudgetPeriodSummary> summaries)
+    {
+        var periodItems = summaries.ToArray();
+        if (periodItems.Length == 0)
+        {
+            return Array.Empty<string>();
+        }
+
+        var maxValue = periodItems
+            .SelectMany(summary => new[] { summary.ActualIncome, summary.ActualExpense })
+            .DefaultIfEmpty(0m)
+            .Max();
+
+        if (maxValue <= 0)
+        {
+            return periodItems.Select(summary => $"{summary.PeriodLabel} | ganhos: 0 | gastos: 0").ToArray();
+        }
+
+        return periodItems.Select(summary =>
+        {
+            var incomeBar = BuildBar(summary.ActualIncome, maxValue);
+            var expenseBar = BuildBar(summary.ActualExpense, maxValue);
+            return $"{summary.PeriodLabel} | G {incomeBar} {summary.ActualIncome:C} | E {expenseBar} {summary.ActualExpense:C}";
+        }).ToArray();
+    }
+
+    private static string BuildBar(decimal value, decimal maxValue)
+    {
+        var blockCount = (int)Math.Round((double)(value / maxValue * 10m), MidpointRounding.AwayFromZero);
+        if (blockCount <= 0)
+        {
+            return "-";
+        }
+
+        return new string('█', blockCount);
+    }
 }

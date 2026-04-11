@@ -8,5 +8,11 @@ public interface IFinancialPlanningService
     Task<IEnumerable<BudgetCategory>> GetBudgetCategoriesByFamilyAsync(int familyId);
     Task<Income> AddIncomeAsync(Income income);
     Task<Expense> AddExpenseAsync(Expense expense);
-    Task<BudgetOverview> GetBudgetOverviewAsync(int userId, int familyId);
+    Task<BudgetOverview> GetBudgetOverviewAsync(
+        int userId,
+        int familyId,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        int? filteredUserId = null,
+        int snapshotCount = 6);
 }
