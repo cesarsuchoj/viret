@@ -51,11 +51,32 @@ public class BudgetPlanningPage : ContentPage
         {
             ItemTemplate = new DataTemplate(() =>
             {
-                var label = new Label();
-                label.SetBinding(Label.TextProperty, new Binding(
-                    path: ".",
-                    stringFormat: "{0.CategoryName} | Limite: {0.PlannedLimit:C} | Previsto: {0.PlannedExpense:C} | Efetivo: {0.ActualExpense:C}"));
-                return label;
+                var categoryNameLabel = new Label();
+                categoryNameLabel.SetBinding(Label.TextProperty, nameof(Viret.Core.Models.BudgetCategorySummary.CategoryName));
+
+                var plannedLimitLabel = new Label();
+                plannedLimitLabel.SetBinding(Label.TextProperty, nameof(Viret.Core.Models.BudgetCategorySummary.PlannedLimit), stringFormat: "Limite: {0:C}");
+
+                var plannedExpenseItemLabel = new Label();
+                plannedExpenseItemLabel.SetBinding(Label.TextProperty, nameof(Viret.Core.Models.BudgetCategorySummary.PlannedExpense), stringFormat: "Previsto: {0:C}");
+
+                var actualExpenseItemLabel = new Label();
+                actualExpenseItemLabel.SetBinding(Label.TextProperty, nameof(Viret.Core.Models.BudgetCategorySummary.ActualExpense), stringFormat: "Efetivo: {0:C}");
+
+                return new HorizontalStackLayout
+                {
+                    Spacing = 6,
+                    Children =
+                    {
+                        categoryNameLabel,
+                        new Label { Text = " | " },
+                        plannedLimitLabel,
+                        new Label { Text = " | " },
+                        plannedExpenseItemLabel,
+                        new Label { Text = " | " },
+                        actualExpenseItemLabel
+                    }
+                };
             })
         };
         categoryList.SetBinding(ItemsView.ItemsSourceProperty, nameof(BudgetPlanningViewModel.CategorySummaries));

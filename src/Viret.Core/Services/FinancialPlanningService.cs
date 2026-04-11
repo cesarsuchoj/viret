@@ -64,8 +64,10 @@ public class FinancialPlanningService : IFinancialPlanningService
         return expense;
     }
 
-    public async Task<BudgetOverview> GetBudgetOverviewAsync(int familyId)
+    public async Task<BudgetOverview> GetBudgetOverviewAsync(int userId, int familyId)
     {
+        await EnsureUserHasFamilyAccessAsync(userId, familyId);
+
         var incomes = await _incomeRepository.GetByFamilyIdAsync(familyId);
         var expenses = await _expenseRepository.GetByFamilyIdAsync(familyId);
         var categories = await _budgetCategoryRepository.GetByFamilyIdAsync(familyId);
@@ -75,10 +77,16 @@ public class FinancialPlanningService : IFinancialPlanningService
         var plannedExpense = expenses.Sum(e => e.PlannedAmount);
         var actualExpense = expenses.Sum(e => e.ActualAmount);
 
+        var expensesByCategoryId = expenses
+            .GroupBy(e => e.BudgetCategoryId)
+            .ToDictionary(group => group.Key, group => group.ToArray());
+
         var categorySummaries = categories
             .Select(category =>
             {
-                var categoryExpenses = expenses.Where(e => e.BudgetCategoryId == category.Id);
+                var categoryExpenses = expensesByCategoryId.TryGetValue(category.Id, out var groupedExpenses)
+                    ? groupedExpenses
+                    : Array.Empty<Expense>();
                 var plannedCategoryExpense = categoryExpenses.Sum(e => e.PlannedAmount);
                 var actualCategoryExpense = categoryExpenses.Sum(e => e.ActualAmount);
 
@@ -125,14 +133,9 @@ public class FinancialPlanningService : IFinancialPlanningService
         }
     }
 
-    private async Task EnsureCategoryBelongsToFamilyAsync(int? categoryId, int familyId)
+    private async Task EnsureCategoryBelongsToFamilyAsync(int categoryId, int familyId)
     {
-        if (!categoryId.HasValue)
-        {
-            return;
-        }
-
-        var category = await _budgetCategoryRepository.GetByIdAsync(categoryId.Value);
+        var category = await _budgetCategoryRepository.GetByIdAsync(categoryId);
         if (category is null || category.FamilyId != familyId)
         {
             throw new InvalidOperationException("Budget category does not belong to the informed family.");
@@ -170,9 +173,9 @@ public class FinancialPlanningService : IFinancialPlanningService
         }
     }
 
-    private static void ValidateCategory(int? categoryId, string parameterName)
+    private static void ValidateCategory(int categoryId, string parameterName)
     {
-        if (!categoryId.HasValue || categoryId.Value <= 0)
+        if (categoryId <= 0)
         {
             throw new ArgumentException("Budget category is required.", parameterName);
         }

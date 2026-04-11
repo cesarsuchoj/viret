@@ -245,7 +245,7 @@ public class LocalPersistenceTests
                     readScope.ServiceProvider.GetRequiredService<IUserRepository>(),
                     readScope.ServiceProvider.GetRequiredService<IFamilyMemberRepository>());
 
-                var overview = await service.GetBudgetOverviewAsync(familyId);
+                var overview = await service.GetBudgetOverviewAsync(userId, familyId);
 
                 Assert.Equal(3000m, overview.PlannedIncome);
                 Assert.Equal(2900m, overview.ActualIncome);

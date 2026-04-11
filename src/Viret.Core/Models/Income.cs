@@ -14,6 +14,6 @@ public class Income
     public int UserId { get; set; }
     public User? User { get; set; }
 
-    public int? BudgetCategoryId { get; set; }
+    public int BudgetCategoryId { get; set; }
     public BudgetCategory? BudgetCategory { get; set; }
 }

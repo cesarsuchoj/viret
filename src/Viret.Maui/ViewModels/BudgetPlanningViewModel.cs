@@ -112,12 +112,18 @@ public partial class BudgetPlanningViewModel : BaseViewModel
             return;
         }
 
+        if (!TryParseUserId(out var userId))
+        {
+            ErrorMessage = "Informe um ID de usuário válido.";
+            return;
+        }
+
         IsBusy = true;
         ErrorMessage = string.Empty;
 
         try
         {
-            var overview = await _financialPlanningService.GetBudgetOverviewAsync(familyId);
+            var overview = await _financialPlanningService.GetBudgetOverviewAsync(userId, familyId);
             PlannedIncome = overview.PlannedIncome;
             ActualIncome = overview.ActualIncome;
             PlannedExpense = overview.PlannedExpense;

@@ -55,7 +55,17 @@ public partial class IncomeEntryViewModel : BaseViewModel
             return;
         }
 
-        Categories = await _financialPlanningService.GetBudgetCategoriesByFamilyAsync(familyId);
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+
+        try
+        {
+            Categories = await _financialPlanningService.GetBudgetCategoriesByFamilyAsync(familyId);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
     }
 
     [RelayCommand]

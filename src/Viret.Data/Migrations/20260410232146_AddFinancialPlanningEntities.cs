@@ -51,7 +51,7 @@ namespace Viret.Data.Migrations
                     Date = table.Column<DateTime>(type: "TEXT", nullable: false),
                     FamilyId = table.Column<int>(type: "INTEGER", nullable: false),
                     UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    BudgetCategoryId = table.Column<int>(type: "INTEGER", nullable: true)
+                    BudgetCategoryId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -61,7 +61,7 @@ namespace Viret.Data.Migrations
                         column: x => x.BudgetCategoryId,
                         principalTable: "BudgetCategories",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Expenses_Families_FamilyId",
                         column: x => x.FamilyId,
@@ -88,7 +88,7 @@ namespace Viret.Data.Migrations
                     Date = table.Column<DateTime>(type: "TEXT", nullable: false),
                     FamilyId = table.Column<int>(type: "INTEGER", nullable: false),
                     UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    BudgetCategoryId = table.Column<int>(type: "INTEGER", nullable: true)
+                    BudgetCategoryId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -98,7 +98,7 @@ namespace Viret.Data.Migrations
                         column: x => x.BudgetCategoryId,
                         principalTable: "BudgetCategories",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Incomes_Families_FamilyId",
                         column: x => x.FamilyId,

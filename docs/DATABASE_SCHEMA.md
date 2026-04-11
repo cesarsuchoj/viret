@@ -65,7 +65,7 @@
 | `Date` | `TEXT` | obrigatório |
 | `FamilyId` | `INTEGER` | FK -> `Families.Id`, delete cascade |
 | `UserId` | `INTEGER` | FK -> `Users.Id`, delete cascade |
-| `BudgetCategoryId` | `INTEGER` | FK opcional -> `BudgetCategories.Id`, delete set null |
+| `BudgetCategoryId` | `INTEGER` | obrigatório, FK -> `BudgetCategories.Id`, delete restrict |
 
 ### `Expenses`
 
@@ -78,7 +78,7 @@
 | `Date` | `TEXT` | obrigatório |
 | `FamilyId` | `INTEGER` | FK -> `Families.Id`, delete cascade |
 | `UserId` | `INTEGER` | FK -> `Users.Id`, delete cascade |
-| `BudgetCategoryId` | `INTEGER` | FK opcional -> `BudgetCategories.Id`, delete set null |
+| `BudgetCategoryId` | `INTEGER` | obrigatório, FK -> `BudgetCategories.Id`, delete restrict |
 
 ## Seed inicial
 

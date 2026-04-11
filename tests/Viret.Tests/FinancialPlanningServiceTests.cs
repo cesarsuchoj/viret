@@ -98,6 +98,8 @@ public class FinancialPlanningServiceTests
     [Fact]
     public async Task GetBudgetOverviewAsync_ReturnsConsolidatedFamilyTotals()
     {
+        SetupFamilyAccess(userId: 3, familyId: 1, hasAccess: true);
+
         _incomeRepositoryMock.Setup(r => r.GetByFamilyIdAsync(1))
             .ReturnsAsync(new[]
             {
@@ -118,7 +120,7 @@ public class FinancialPlanningServiceTests
                 new BudgetCategory { Id = 7, FamilyId = 1, Name = "Alimentação", PlannedLimit = 600m }
             });
 
-        var overview = await _sut.GetBudgetOverviewAsync(1);
+        var overview = await _sut.GetBudgetOverviewAsync(3, 1);
 
         Assert.Equal(1500m, overview.PlannedIncome);
         Assert.Equal(1450m, overview.ActualIncome);
@@ -133,6 +135,14 @@ public class FinancialPlanningServiceTests
         Assert.Equal(420m, category.ActualExpense);
         Assert.Equal(150m, category.PlannedAvailable);
         Assert.Equal(180m, category.ActualAvailable);
+    }
+
+    [Fact]
+    public async Task GetBudgetOverviewAsync_WithoutFamilyAccess_ThrowsUnauthorizedAccessException()
+    {
+        SetupFamilyAccess(userId: 3, familyId: 1, hasAccess: false);
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _sut.GetBudgetOverviewAsync(3, 1));
     }
 
     private void SetupFamilyAccess(int userId, int familyId, bool hasAccess)

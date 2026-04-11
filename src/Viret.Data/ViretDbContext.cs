@@ -93,7 +93,7 @@ public class ViretDbContext : DbContext
             entity.HasOne(i => i.BudgetCategory)
                 .WithMany(c => c.Incomes)
                 .HasForeignKey(i => i.BudgetCategoryId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Expense>(entity =>
@@ -113,7 +113,7 @@ public class ViretDbContext : DbContext
             entity.HasOne(e => e.BudgetCategory)
                 .WithMany(c => c.Expenses)
                 .HasForeignKey(e => e.BudgetCategoryId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

@@ -60,7 +60,7 @@ namespace Viret.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("BudgetCategoryId")
+                    b.Property<int>("BudgetCategoryId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Date")
@@ -136,7 +136,7 @@ namespace Viret.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("BudgetCategoryId")
+                    b.Property<int>("BudgetCategoryId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Date")
@@ -252,7 +252,8 @@ namespace Viret.Data.Migrations
                     b.HasOne("Viret.Core.Models.BudgetCategory", "BudgetCategory")
                         .WithMany("Expenses")
                         .HasForeignKey("BudgetCategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Viret.Core.Models.Family", "Family")
                         .WithMany("Expenses")
@@ -297,7 +298,8 @@ namespace Viret.Data.Migrations
                     b.HasOne("Viret.Core.Models.BudgetCategory", "BudgetCategory")
                         .WithMany("Incomes")
                         .HasForeignKey("BudgetCategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Viret.Core.Models.Family", "Family")
                         .WithMany("Incomes")
