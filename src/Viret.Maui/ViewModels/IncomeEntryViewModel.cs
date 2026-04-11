@@ -64,7 +64,7 @@ public partial class IncomeEntryViewModel : BaseViewModel
         }
         catch (Exception)
         {
-            ErrorMessage = "Não foi possível carregar as categorias de orçamento.";
+            ErrorMessage = "Não foi possível carregar as categorias de orçamento. Verifique os dados e tente novamente.";
         }
     }
 
