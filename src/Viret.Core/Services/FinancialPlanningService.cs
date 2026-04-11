@@ -201,28 +201,44 @@ public class FinancialPlanningService : IFinancialPlanningService
         DateTime? startDate,
         DateTime? endDate)
     {
+        var incomesWithValidDates = incomes
+            .Where(income => income.Date != DateTime.MinValue)
+            .ToArray();
+
+        var expensesWithValidDates = expenses
+            .Where(expense => expense.Date != DateTime.MinValue)
+            .ToArray();
+
+        if (!startDate.HasValue &&
+            !endDate.HasValue &&
+            incomesWithValidDates.Length == 0 &&
+            expensesWithValidDates.Length == 0)
+        {
+            return Array.Empty<BudgetPeriodSummary>();
+        }
+
         var minDate = new[]
         {
-            incomes.Any() ? incomes.Min(i => i.Date).Date : (DateTime?)null,
-            expenses.Any() ? expenses.Min(e => e.Date).Date : (DateTime?)null,
+            incomesWithValidDates.Any() ? incomesWithValidDates.Min(i => i.Date).Date : (DateTime?)null,
+            expensesWithValidDates.Any() ? expensesWithValidDates.Min(e => e.Date).Date : (DateTime?)null,
             startDate?.Date
         }.Where(date => date.HasValue).Select(date => date!.Value).DefaultIfEmpty(DateTime.Today).Min();
 
         var maxDate = new[]
         {
-            incomes.Any() ? incomes.Max(i => i.Date).Date : (DateTime?)null,
-            expenses.Any() ? expenses.Max(e => e.Date).Date : (DateTime?)null,
+            incomesWithValidDates.Any() ? incomesWithValidDates.Max(i => i.Date).Date : (DateTime?)null,
+            expensesWithValidDates.Any() ? expensesWithValidDates.Max(e => e.Date).Date : (DateTime?)null,
             endDate?.Date
         }.Where(date => date.HasValue).Select(date => date!.Value).DefaultIfEmpty(DateTime.Today).Max();
 
         var periodStart = new DateTime(minDate.Year, minDate.Month, 1);
         var periodEnd = new DateTime(maxDate.Year, maxDate.Month, 1);
 
-        var incomeByPeriod = incomes
+        var incomeByPeriod = incomesWithValidDates
             .GroupBy(income => new DateTime(income.Date.Year, income.Date.Month, 1))
             .ToDictionary(group => group.Key, group => group.ToArray());
 
-        var expenseByPeriod = expenses
+        var expenseByPeriod = expensesWithValidDates
             .GroupBy(expense => new DateTime(expense.Date.Year, expense.Date.Month, 1))
             .ToDictionary(group => group.Key, group => group.ToArray());
 

@@ -150,6 +150,12 @@ public partial class BudgetPlanningViewModel : BaseViewModel
                 return;
             }
 
+            if (StartDate.Date > EndDate.Date)
+            {
+                ErrorMessage = "A data inicial não pode ser maior que a data final.";
+                return;
+            }
+
             int? filteredUserId = null;
             if (!string.IsNullOrWhiteSpace(ReportUserIdText))
             {

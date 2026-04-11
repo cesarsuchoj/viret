@@ -200,6 +200,54 @@ public class FinancialPlanningServiceTests
             _sut.GetBudgetOverviewAsync(3, 1, new DateTime(2026, 2, 1), new DateTime(2026, 1, 1)));
     }
 
+    [Fact]
+    public async Task GetBudgetOverviewAsync_WithoutTransactionsAndWithoutRange_ReturnsEmptyPeriodsAndSnapshots()
+    {
+        SetupFamilyAccess(userId: 3, familyId: 1, hasAccess: true);
+
+        _incomeRepositoryMock.Setup(r => r.GetByFamilyIdAsync(1)).ReturnsAsync(Array.Empty<Income>());
+        _expenseRepositoryMock.Setup(r => r.GetByFamilyIdAsync(1)).ReturnsAsync(Array.Empty<Expense>());
+        _budgetCategoryRepositoryMock.Setup(r => r.GetByFamilyIdAsync(1)).ReturnsAsync(Array.Empty<BudgetCategory>());
+
+        var overview = await _sut.GetBudgetOverviewAsync(3, 1, startDate: null, endDate: null);
+
+        Assert.Empty(overview.PeriodSummaries);
+        Assert.Empty(overview.Snapshots);
+    }
+
+    [Fact]
+    public async Task GetBudgetOverviewAsync_WithDefaultDateTransactions_IgnoresInvalidDatesInPeriodsAndSnapshots()
+    {
+        SetupFamilyAccess(userId: 3, familyId: 1, hasAccess: true);
+
+        _incomeRepositoryMock.Setup(r => r.GetByFamilyIdAsync(1))
+            .ReturnsAsync(new[]
+            {
+                new Income { FamilyId = 1, UserId = 3, PlannedAmount = 1000m, ActualAmount = 1000m, Date = new DateTime(2026, 3, 10) }
+            });
+
+        _expenseRepositoryMock.Setup(r => r.GetByFamilyIdAsync(1))
+            .ReturnsAsync(new[]
+            {
+                new Expense { FamilyId = 1, UserId = 3, PlannedAmount = 100m, ActualAmount = 90m, Date = DateTime.MinValue, BudgetCategoryId = 7 }
+            });
+
+        _budgetCategoryRepositoryMock.Setup(r => r.GetByFamilyIdAsync(1))
+            .ReturnsAsync(new[]
+            {
+                new BudgetCategory { Id = 7, FamilyId = 1, Name = "Casa", PlannedLimit = 300m }
+            });
+
+        var overview = await _sut.GetBudgetOverviewAsync(3, 1);
+
+        var period = Assert.Single(overview.PeriodSummaries);
+        Assert.Equal("2026-03", period.PeriodLabel);
+        Assert.DoesNotContain(overview.PeriodSummaries, summary => summary.PeriodLabel.StartsWith("0001-"));
+
+        var snapshot = Assert.Single(overview.Snapshots);
+        Assert.Equal("2026-03", snapshot.Label);
+    }
+
     private void SetupFamilyAccess(int userId, int familyId, bool hasAccess)
     {
         _userRepositoryMock.Setup(r => r.GetByIdAsync(userId)).ReturnsAsync(new User { Id = userId, Email = "ana@example.com", PasswordHash = "hash", Name = "Ana" });

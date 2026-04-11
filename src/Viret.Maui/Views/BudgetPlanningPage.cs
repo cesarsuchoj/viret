@@ -21,15 +21,25 @@ public class BudgetPlanningPage : ContentPage
 
         var reportUserIdEntry = new Entry { Placeholder = "Filtrar por usuário (opcional)", Keyboard = Keyboard.Numeric };
         reportUserIdEntry.SetBinding(Entry.TextProperty, nameof(BudgetPlanningViewModel.ReportUserIdText));
+        AutomationProperties.SetName(reportUserIdEntry, "Filtro por usuário");
+        AutomationProperties.SetHelpText(reportUserIdEntry, "Informe o ID do usuário para filtrar o relatório");
 
+        var startDateLabel = new Label { Text = "Data inicial" };
         var startDatePicker = new DatePicker();
         startDatePicker.SetBinding(DatePicker.DateProperty, nameof(BudgetPlanningViewModel.StartDate));
+        AutomationProperties.SetName(startDatePicker, "Data inicial");
+        AutomationProperties.SetHelpText(startDatePicker, "Selecione a data inicial do filtro");
 
+        var endDateLabel = new Label { Text = "Data final" };
         var endDatePicker = new DatePicker();
         endDatePicker.SetBinding(DatePicker.DateProperty, nameof(BudgetPlanningViewModel.EndDate));
+        AutomationProperties.SetName(endDatePicker, "Data final");
+        AutomationProperties.SetHelpText(endDatePicker, "Selecione a data final do filtro");
 
         var snapshotCountEntry = new Entry { Placeholder = "Qtd. de snapshots", Keyboard = Keyboard.Numeric };
         snapshotCountEntry.SetBinding(Entry.TextProperty, nameof(BudgetPlanningViewModel.SnapshotCountText));
+        AutomationProperties.SetName(snapshotCountEntry, "Quantidade de snapshots");
+        AutomationProperties.SetHelpText(snapshotCountEntry, "Informe quantos snapshots históricos devem ser exibidos");
 
         var categoryNameEntry = new Entry { Placeholder = "Nova categoria" };
         categoryNameEntry.SetBinding(Entry.TextProperty, nameof(BudgetPlanningViewModel.CategoryName));
@@ -172,7 +182,7 @@ public class BudgetPlanningPage : ContentPage
                 Spacing = 12,
                 Children =
                 {
-                    familyIdEntry, userIdEntry, reportUserIdEntry, startDatePicker, endDatePicker, snapshotCountEntry,
+                    familyIdEntry, userIdEntry, reportUserIdEntry, startDateLabel, startDatePicker, endDateLabel, endDatePicker, snapshotCountEntry,
                     categoryNameEntry, categoryLimitEntry, createCategoryButton, loadButton,
                     plannedIncomeLabel, actualIncomeLabel, plannedExpenseLabel, actualExpenseLabel, plannedAvailableLabel, actualAvailableLabel,
                     periodChartTitleLabel, periodChartList, periodList, categoryList, snapshotTitleLabel, snapshotList, successLabel, errorLabel
