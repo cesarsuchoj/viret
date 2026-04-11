@@ -84,6 +84,9 @@ public partial class FamilySelectionViewModel : BaseViewModel
     [RelayCommand]
     private async Task SelectFamilyAsync()
     {
+        if (IsBusy)
+            return;
+
         if (!TryParseUserId(out var parsedUserId))
         {
             HasAccessToSelectedFamily = false;
@@ -98,12 +101,26 @@ public partial class FamilySelectionViewModel : BaseViewModel
             return;
         }
 
+        IsBusy = true;
         ErrorMessage = string.Empty;
-        UserId = parsedUserId;
-        HasAccessToSelectedFamily = await _userService.UserHasAccessToFamilyAsync(parsedUserId, SelectedFamily.Id);
 
-        if (!HasAccessToSelectedFamily)
-            ErrorMessage = "Sem acesso à família selecionada.";
+        try
+        {
+            UserId = parsedUserId;
+            HasAccessToSelectedFamily = await _userService.UserHasAccessToFamilyAsync(parsedUserId, SelectedFamily.Id);
+
+            if (!HasAccessToSelectedFamily)
+                ErrorMessage = "Sem acesso à família selecionada.";
+        }
+        catch (Exception ex)
+        {
+            HasAccessToSelectedFamily = false;
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand]
