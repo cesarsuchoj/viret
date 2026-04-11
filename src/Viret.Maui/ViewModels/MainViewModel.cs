@@ -62,7 +62,11 @@ public partial class MainViewModel : BaseViewModel
         }
 
         if (!int.TryParse(value, out var parsedFamilyId) || parsedFamilyId <= 0)
+        {
+            if (FamilyId != 0)
+                FamilyId = 0;
             return;
+        }
 
         if (FamilyId != parsedFamilyId)
             FamilyId = parsedFamilyId;
