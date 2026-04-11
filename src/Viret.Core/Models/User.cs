@@ -8,4 +8,7 @@ public class User
     public string PasswordHash { get; set; } = string.Empty;
 
     public ICollection<FamilyMember> FamilyMemberships { get; set; } = new List<FamilyMember>();
+    public ICollection<BudgetCategory> BudgetCategories { get; set; } = new List<BudgetCategory>();
+    public ICollection<Income> Incomes { get; set; } = new List<Income>();
+    public ICollection<Expense> Expenses { get; set; } = new List<Expense>();
 }

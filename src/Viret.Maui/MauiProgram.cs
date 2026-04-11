@@ -25,14 +25,21 @@ public static class MauiProgram
         builder.Services.AddScoped<ITransactionService, TransactionService>();
         builder.Services.AddScoped<IFamilyService, FamilyService>();
         builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IFinancialPlanningService, FinancialPlanningService>();
 
         builder.Services.AddTransient<MainViewModel>();
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<RegisterViewModel>();
         builder.Services.AddTransient<FamilySelectionViewModel>();
+        builder.Services.AddTransient<IncomeEntryViewModel>();
+        builder.Services.AddTransient<ExpenseEntryViewModel>();
+        builder.Services.AddTransient<BudgetPlanningViewModel>();
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<RegisterPage>();
         builder.Services.AddTransient<FamilySelectionPage>();
+        builder.Services.AddTransient<IncomeEntryPage>();
+        builder.Services.AddTransient<ExpenseEntryPage>();
+        builder.Services.AddTransient<BudgetPlanningPage>();
         builder.Services.AddTransient<MainPage>();
 
         var app = builder.Build();
