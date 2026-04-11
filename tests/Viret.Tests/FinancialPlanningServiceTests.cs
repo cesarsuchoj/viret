@@ -145,6 +145,61 @@ public class FinancialPlanningServiceTests
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _sut.GetBudgetOverviewAsync(3, 1));
     }
 
+    [Fact]
+    public async Task GetBudgetOverviewAsync_WithPeriodAndUserFilters_ReturnsFilteredDashboardsData()
+    {
+        SetupFamilyAccess(userId: 3, familyId: 1, hasAccess: true);
+        SetupFamilyAccess(userId: 4, familyId: 1, hasAccess: true);
+
+        _incomeRepositoryMock.Setup(r => r.GetByFamilyIdAsync(1))
+            .ReturnsAsync(new[]
+            {
+                new Income { FamilyId = 1, UserId = 4, PlannedAmount = 800m, ActualAmount = 820m, Date = new DateTime(2026, 1, 10) },
+                new Income { FamilyId = 1, UserId = 4, PlannedAmount = 900m, ActualAmount = 910m, Date = new DateTime(2026, 2, 10) },
+                new Income { FamilyId = 1, UserId = 3, PlannedAmount = 2000m, ActualAmount = 2000m, Date = new DateTime(2026, 2, 15) }
+            });
+
+        _expenseRepositoryMock.Setup(r => r.GetByFamilyIdAsync(1))
+            .ReturnsAsync(new[]
+            {
+                new Expense { FamilyId = 1, UserId = 4, PlannedAmount = 200m, ActualAmount = 210m, Date = new DateTime(2026, 1, 11), BudgetCategoryId = 7 },
+                new Expense { FamilyId = 1, UserId = 4, PlannedAmount = 300m, ActualAmount = 280m, Date = new DateTime(2026, 2, 11), BudgetCategoryId = 7 },
+                new Expense { FamilyId = 1, UserId = 3, PlannedAmount = 999m, ActualAmount = 999m, Date = new DateTime(2026, 2, 16), BudgetCategoryId = 7 }
+            });
+
+        _budgetCategoryRepositoryMock.Setup(r => r.GetByFamilyIdAsync(1))
+            .ReturnsAsync(new[]
+            {
+                new BudgetCategory { Id = 7, FamilyId = 1, Name = "Casa", PlannedLimit = 1000m }
+            });
+
+        var overview = await _sut.GetBudgetOverviewAsync(
+            userId: 3,
+            familyId: 1,
+            startDate: new DateTime(2026, 1, 1),
+            endDate: new DateTime(2026, 2, 28),
+            filteredUserId: 4,
+            snapshotCount: 1);
+
+        Assert.Equal(1700m, overview.PlannedIncome);
+        Assert.Equal(1730m, overview.ActualIncome);
+        Assert.Equal(500m, overview.PlannedExpense);
+        Assert.Equal(490m, overview.ActualExpense);
+        Assert.Equal(1200m, overview.PlannedAvailable);
+        Assert.Equal(1240m, overview.ActualAvailable);
+
+        Assert.Equal(2, overview.PeriodSummaries.Count);
+        Assert.Single(overview.Snapshots);
+        Assert.Equal("2026-02", overview.Snapshots.Single().Label);
+    }
+
+    [Fact]
+    public async Task GetBudgetOverviewAsync_WithInvalidDateRange_ThrowsArgumentException()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _sut.GetBudgetOverviewAsync(3, 1, new DateTime(2026, 2, 1), new DateTime(2026, 1, 1)));
+    }
+
     private void SetupFamilyAccess(int userId, int familyId, bool hasAccess)
     {
         _userRepositoryMock.Setup(r => r.GetByIdAsync(userId)).ReturnsAsync(new User { Id = userId, Email = "ana@example.com", PasswordHash = "hash", Name = "Ana" });

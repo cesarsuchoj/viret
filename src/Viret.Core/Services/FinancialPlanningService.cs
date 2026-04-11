@@ -64,20 +64,49 @@ public class FinancialPlanningService : IFinancialPlanningService
         return expense;
     }
 
-    public async Task<BudgetOverview> GetBudgetOverviewAsync(int userId, int familyId)
+    public async Task<BudgetOverview> GetBudgetOverviewAsync(
+        int userId,
+        int familyId,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        int? filteredUserId = null,
+        int snapshotCount = 6)
     {
+        if (startDate.HasValue && endDate.HasValue && startDate.Value.Date > endDate.Value.Date)
+        {
+            throw new ArgumentException("Start date cannot be greater than end date.", nameof(startDate));
+        }
+
+        if (filteredUserId.HasValue && filteredUserId.Value <= 0)
+        {
+            throw new ArgumentException("Filtered user id must be greater than zero.", nameof(filteredUserId));
+        }
+
+        if (snapshotCount <= 0)
+        {
+            throw new ArgumentException("Snapshot count must be greater than zero.", nameof(snapshotCount));
+        }
+
         await EnsureUserHasFamilyAccessAsync(userId, familyId);
+
+        if (filteredUserId.HasValue)
+        {
+            await EnsureUserHasFamilyAccessAsync(filteredUserId.Value, familyId);
+        }
 
         var incomes = await _incomeRepository.GetByFamilyIdAsync(familyId);
         var expenses = await _expenseRepository.GetByFamilyIdAsync(familyId);
         var categories = await _budgetCategoryRepository.GetByFamilyIdAsync(familyId);
 
-        var plannedIncome = incomes.Sum(i => i.PlannedAmount);
-        var actualIncome = incomes.Sum(i => i.ActualAmount);
-        var plannedExpense = expenses.Sum(e => e.PlannedAmount);
-        var actualExpense = expenses.Sum(e => e.ActualAmount);
+        var filteredIncomes = ApplyFilters(incomes, startDate, endDate, filteredUserId).ToArray();
+        var filteredExpenses = ApplyFilters(expenses, startDate, endDate, filteredUserId).ToArray();
 
-        var expensesByCategoryId = expenses
+        var plannedIncome = filteredIncomes.Sum(i => i.PlannedAmount);
+        var actualIncome = filteredIncomes.Sum(i => i.ActualAmount);
+        var plannedExpense = filteredExpenses.Sum(e => e.PlannedAmount);
+        var actualExpense = filteredExpenses.Sum(e => e.ActualAmount);
+
+        var expensesByCategoryId = filteredExpenses
             .GroupBy(e => e.BudgetCategoryId)
             .ToDictionary(group => group.Key, group => group.ToArray());
 
@@ -103,17 +132,144 @@ public class FinancialPlanningService : IFinancialPlanningService
             })
             .ToArray();
 
+        var periodSummaries = BuildPeriodSummaries(filteredIncomes, filteredExpenses, startDate, endDate);
+        var snapshots = periodSummaries
+            .OrderByDescending(period => period.PeriodStart)
+            .Take(snapshotCount)
+            .Select(period => new BudgetSnapshot
+            {
+                CapturedAt = period.PeriodStart,
+                Label = period.PeriodLabel,
+                PlannedIncome = period.PlannedIncome,
+                ActualIncome = period.ActualIncome,
+                PlannedExpense = period.PlannedExpense,
+                ActualExpense = period.ActualExpense,
+                PlannedAvailable = period.PlannedAvailable,
+                ActualAvailable = period.ActualAvailable
+            })
+            .ToArray();
+
         return new BudgetOverview
         {
+            StartDate = startDate?.Date,
+            EndDate = endDate?.Date,
+            FilteredUserId = filteredUserId,
             PlannedIncome = plannedIncome,
             ActualIncome = actualIncome,
             PlannedExpense = plannedExpense,
             ActualExpense = actualExpense,
             PlannedAvailable = plannedIncome - plannedExpense,
             ActualAvailable = actualIncome - actualExpense,
-            CategorySummaries = categorySummaries
+            CategorySummaries = categorySummaries,
+            PeriodSummaries = periodSummaries,
+            Snapshots = snapshots
         };
     }
+
+    private static IEnumerable<TTransaction> ApplyFilters<TTransaction>(
+        IEnumerable<TTransaction> source,
+        DateTime? startDate,
+        DateTime? endDate,
+        int? filteredUserId)
+        where TTransaction : class
+    {
+        IEnumerable<TTransaction> query = source;
+
+        if (filteredUserId.HasValue)
+        {
+            query = query.Where(item => GetUserId(item) == filteredUserId.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            var normalizedStart = startDate.Value.Date;
+            query = query.Where(item => GetDate(item).Date >= normalizedStart);
+        }
+
+        if (endDate.HasValue)
+        {
+            var normalizedEnd = endDate.Value.Date;
+            query = query.Where(item => GetDate(item).Date <= normalizedEnd);
+        }
+
+        return query;
+    }
+
+    private static IReadOnlyCollection<BudgetPeriodSummary> BuildPeriodSummaries(
+        IReadOnlyCollection<Income> incomes,
+        IReadOnlyCollection<Expense> expenses,
+        DateTime? startDate,
+        DateTime? endDate)
+    {
+        var minDate = new[]
+        {
+            incomes.Any() ? incomes.Min(i => i.Date).Date : (DateTime?)null,
+            expenses.Any() ? expenses.Min(e => e.Date).Date : (DateTime?)null,
+            startDate?.Date
+        }.Where(date => date.HasValue).Select(date => date!.Value).DefaultIfEmpty(DateTime.Today).Min();
+
+        var maxDate = new[]
+        {
+            incomes.Any() ? incomes.Max(i => i.Date).Date : (DateTime?)null,
+            expenses.Any() ? expenses.Max(e => e.Date).Date : (DateTime?)null,
+            endDate?.Date
+        }.Where(date => date.HasValue).Select(date => date!.Value).DefaultIfEmpty(DateTime.Today).Max();
+
+        var periodStart = new DateTime(minDate.Year, minDate.Month, 1);
+        var periodEnd = new DateTime(maxDate.Year, maxDate.Month, 1);
+
+        var incomeByPeriod = incomes
+            .GroupBy(income => new DateTime(income.Date.Year, income.Date.Month, 1))
+            .ToDictionary(group => group.Key, group => group.ToArray());
+
+        var expenseByPeriod = expenses
+            .GroupBy(expense => new DateTime(expense.Date.Year, expense.Date.Month, 1))
+            .ToDictionary(group => group.Key, group => group.ToArray());
+
+        var periods = new List<BudgetPeriodSummary>();
+        for (var cursor = periodStart; cursor <= periodEnd; cursor = cursor.AddMonths(1))
+        {
+            var periodIncomes = incomeByPeriod.TryGetValue(cursor, out var groupedIncomes) ? groupedIncomes : Array.Empty<Income>();
+            var periodExpenses = expenseByPeriod.TryGetValue(cursor, out var groupedExpenses) ? groupedExpenses : Array.Empty<Expense>();
+
+            var periodPlannedIncome = periodIncomes.Sum(income => income.PlannedAmount);
+            var periodActualIncome = periodIncomes.Sum(income => income.ActualAmount);
+            var periodPlannedExpense = periodExpenses.Sum(expense => expense.PlannedAmount);
+            var periodActualExpense = periodExpenses.Sum(expense => expense.ActualAmount);
+
+            periods.Add(new BudgetPeriodSummary
+            {
+                PeriodStart = cursor,
+                PeriodLabel = cursor.ToString("yyyy-MM"),
+                PlannedIncome = periodPlannedIncome,
+                ActualIncome = periodActualIncome,
+                PlannedExpense = periodPlannedExpense,
+                ActualExpense = periodActualExpense,
+                PlannedAvailable = periodPlannedIncome - periodPlannedExpense,
+                ActualAvailable = periodActualIncome - periodActualExpense
+            });
+        }
+
+        return periods;
+    }
+
+    private static int GetUserId<TTransaction>(TTransaction transaction)
+        where TTransaction : class
+        => transaction switch
+        {
+            Income income => income.UserId,
+            Expense expense => expense.UserId,
+            _ => throw new InvalidOperationException("Unsupported transaction type.")
+        };
+
+    private static DateTime GetDate<TTransaction>(TTransaction transaction)
+        where TTransaction : class
+        => transaction switch
+        {
+            Income income => income.Date,
+            Expense expense => expense.Date,
+            _ => throw new InvalidOperationException("Unsupported transaction type.")
+        };
 
     private async Task EnsureUserHasFamilyAccessAsync(int userId, int familyId)
     {
