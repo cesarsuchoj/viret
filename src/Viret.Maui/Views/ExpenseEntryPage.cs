@@ -1,5 +1,4 @@
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Graphics;
 using Viret.Maui.ViewModels;
 
 namespace Viret.Maui.Views;
@@ -31,6 +30,7 @@ public class ExpenseEntryPage : ContentPage
 
         var loadCategoriesButton = new Button { Text = "Carregar categorias" };
         loadCategoriesButton.SetBinding(Button.CommandProperty, nameof(ExpenseEntryViewModel.LoadCategoriesCommand));
+        loadCategoriesButton.SetBinding(VisualElement.IsEnabledProperty, nameof(ExpenseEntryViewModel.IsNotBusy));
 
         var categoryPicker = new Picker { Title = "Categoria" };
         categoryPicker.SetBinding(Picker.ItemsSourceProperty, nameof(ExpenseEntryViewModel.Categories));
@@ -39,12 +39,11 @@ public class ExpenseEntryPage : ContentPage
 
         var saveButton = new Button { Text = "Registrar gasto" };
         saveButton.SetBinding(Button.CommandProperty, nameof(ExpenseEntryViewModel.SaveExpenseCommand));
+        saveButton.SetBinding(VisualElement.IsEnabledProperty, nameof(ExpenseEntryViewModel.IsNotBusy));
 
-        var successLabel = new Label { TextColor = Colors.Green };
-        successLabel.SetBinding(Label.TextProperty, nameof(ExpenseEntryViewModel.SuccessMessage));
-
-        var errorLabel = new Label { TextColor = Colors.Red };
-        errorLabel.SetBinding(Label.TextProperty, nameof(ExpenseEntryViewModel.ErrorMessage));
+        var loadingFeedback = FeedbackUi.CreateLoadingFeedback();
+        var successLabel = FeedbackUi.CreateSuccessLabel(nameof(ExpenseEntryViewModel.SuccessMessage));
+        var errorLabel = FeedbackUi.CreateErrorLabel(nameof(ExpenseEntryViewModel.ErrorMessage));
 
         Content = new ScrollView
         {
@@ -55,7 +54,7 @@ public class ExpenseEntryPage : ContentPage
                 Children =
                 {
                     familyIdEntry, userIdEntry, descriptionEntry, plannedAmountEntry, actualAmountEntry, datePicker,
-                    loadCategoriesButton, categoryPicker, saveButton, successLabel, errorLabel
+                    loadCategoriesButton, categoryPicker, saveButton, loadingFeedback, successLabel, errorLabel
                 }
             }
         };

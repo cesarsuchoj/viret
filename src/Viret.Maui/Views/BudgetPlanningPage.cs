@@ -1,5 +1,4 @@
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Graphics;
 using Viret.Maui.ViewModels;
 
 namespace Viret.Maui.Views;
@@ -49,9 +48,11 @@ public class BudgetPlanningPage : ContentPage
 
         var createCategoryButton = new Button { Text = "Criar categoria" };
         createCategoryButton.SetBinding(Button.CommandProperty, nameof(BudgetPlanningViewModel.CreateCategoryCommand));
+        createCategoryButton.SetBinding(VisualElement.IsEnabledProperty, nameof(BudgetPlanningViewModel.IsNotBusy));
 
         var loadButton = new Button { Text = "Atualizar orçamento" };
         loadButton.SetBinding(Button.CommandProperty, nameof(BudgetPlanningViewModel.LoadOverviewCommand));
+        loadButton.SetBinding(VisualElement.IsEnabledProperty, nameof(BudgetPlanningViewModel.IsNotBusy));
 
         var plannedIncomeLabel = new Label();
         plannedIncomeLabel.SetBinding(Label.TextProperty, nameof(BudgetPlanningViewModel.PlannedIncome), stringFormat: "Ganhos previstos: {0:C}");
@@ -168,11 +169,9 @@ public class BudgetPlanningPage : ContentPage
         };
         snapshotList.SetBinding(ItemsView.ItemsSourceProperty, nameof(BudgetPlanningViewModel.Snapshots));
 
-        var successLabel = new Label { TextColor = Colors.Green };
-        successLabel.SetBinding(Label.TextProperty, nameof(BudgetPlanningViewModel.SuccessMessage));
-
-        var errorLabel = new Label { TextColor = Colors.Red };
-        errorLabel.SetBinding(Label.TextProperty, nameof(BudgetPlanningViewModel.ErrorMessage));
+        var loadingFeedback = FeedbackUi.CreateLoadingFeedback();
+        var successLabel = FeedbackUi.CreateSuccessLabel(nameof(BudgetPlanningViewModel.SuccessMessage));
+        var errorLabel = FeedbackUi.CreateErrorLabel(nameof(BudgetPlanningViewModel.ErrorMessage));
 
         Content = new ScrollView
         {
@@ -184,6 +183,7 @@ public class BudgetPlanningPage : ContentPage
                 {
                     familyIdEntry, userIdEntry, reportUserIdEntry, startDateLabel, startDatePicker, endDateLabel, endDatePicker, snapshotCountEntry,
                     categoryNameEntry, categoryLimitEntry, createCategoryButton, loadButton,
+                    loadingFeedback,
                     plannedIncomeLabel, actualIncomeLabel, plannedExpenseLabel, actualExpenseLabel, plannedAvailableLabel, actualAvailableLabel,
                     periodChartTitleLabel, periodChartList, periodList, categoryList, snapshotTitleLabel, snapshotList, successLabel, errorLabel
                 }

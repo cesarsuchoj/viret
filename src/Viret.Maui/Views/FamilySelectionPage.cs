@@ -1,5 +1,4 @@
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Graphics;
 using Viret.Maui.ViewModels;
 
 namespace Viret.Maui.Views;
@@ -16,6 +15,7 @@ public class FamilySelectionPage : ContentPage
 
         var loadButton = new Button { Text = "Carregar famílias" };
         loadButton.SetBinding(Button.CommandProperty, nameof(FamilySelectionViewModel.LoadFamiliesCommand));
+        loadButton.SetBinding(VisualElement.IsEnabledProperty, nameof(FamilySelectionViewModel.IsNotBusy));
 
         var picker = new Picker { Title = "Família" };
         picker.SetBinding(Picker.ItemsSourceProperty, nameof(FamilySelectionViewModel.Families));
@@ -32,8 +32,10 @@ public class FamilySelectionPage : ContentPage
         var createFamilyButton = new Button { Text = "Criar nova família" };
         createFamilyButton.SetBinding(Button.CommandProperty, nameof(FamilySelectionViewModel.CreateFamilyCommand));
         createFamilyButton.SetBinding(VisualElement.IsVisibleProperty, nameof(FamilySelectionViewModel.ShowCreateFamilyOption));
+        createFamilyButton.SetBinding(VisualElement.IsEnabledProperty, nameof(FamilySelectionViewModel.IsNotBusy));
 
         var selectButton = new Button { Text = "Entrar na família" };
+        selectButton.SetBinding(VisualElement.IsEnabledProperty, nameof(FamilySelectionViewModel.IsNotBusy));
         selectButton.Clicked += async (_, _) =>
         {
             await viewModel.SelectFamilyCommand.ExecuteAsync(null);
@@ -59,14 +61,19 @@ public class FamilySelectionPage : ContentPage
         var accessLabel = new Label();
         accessLabel.SetBinding(Label.TextProperty, nameof(FamilySelectionViewModel.HasAccessToSelectedFamily), stringFormat: "Acesso autorizado: {0}");
 
-        var errorLabel = new Label { TextColor = Colors.Red };
-        errorLabel.SetBinding(Label.TextProperty, nameof(FamilySelectionViewModel.ErrorMessage));
+        var loadingFeedback = FeedbackUi.CreateLoadingFeedback();
+        var successLabel = FeedbackUi.CreateSuccessLabel(nameof(FamilySelectionViewModel.SuccessMessage));
+        var errorLabel = FeedbackUi.CreateErrorLabel(nameof(FamilySelectionViewModel.ErrorMessage));
 
         Content = new VerticalStackLayout
         {
             Padding = 24,
             Spacing = 12,
-            Children = { userIdEntry, loadButton, picker, noFamilyLabel, newFamilyNameEntry, createFamilyButton, selectButton, accessLabel, errorLabel }
+            Children =
+            {
+                userIdEntry, loadButton, picker, noFamilyLabel, newFamilyNameEntry, createFamilyButton, selectButton,
+                loadingFeedback, successLabel, accessLabel, errorLabel
+            }
         };
     }
 }

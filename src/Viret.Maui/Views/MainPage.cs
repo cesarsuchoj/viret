@@ -15,6 +15,7 @@ public class MainPage : ContentPage
 
         var loadButton = new Button { Text = "Atualizar dados" };
         loadButton.SetBinding(Button.CommandProperty, nameof(MainViewModel.LoadDataCommand));
+        loadButton.SetBinding(VisualElement.IsEnabledProperty, nameof(MainViewModel.IsNotBusy));
 
         var balanceLabel = new Label { FontSize = 18, FontAttributes = FontAttributes.Bold };
         balanceLabel.SetBinding(Label.TextProperty, nameof(MainViewModel.Balance), stringFormat: "Saldo: {0:C}");
@@ -45,11 +46,15 @@ public class MainPage : ContentPage
             };
         });
 
+        var loadingFeedback = FeedbackUi.CreateLoadingFeedback();
+        var successLabel = FeedbackUi.CreateSuccessLabel(nameof(MainViewModel.SuccessMessage));
+        var errorLabel = FeedbackUi.CreateErrorLabel(nameof(MainViewModel.ErrorMessage));
+
         Content = new VerticalStackLayout
         {
             Padding = 24,
             Spacing = 12,
-            Children = { familyIdEntry, loadButton, balanceLabel, transactionsView }
+            Children = { familyIdEntry, loadButton, loadingFeedback, successLabel, errorLabel, balanceLabel, transactionsView }
         };
     }
 }

@@ -111,9 +111,9 @@ public partial class ExpenseEntryViewModel : BaseViewModel
 
             SuccessMessage = "Gasto registrado com sucesso.";
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = "Não foi possível registrar o gasto agora. Verifique os dados e tente novamente.";
         }
         finally
         {

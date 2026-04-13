@@ -109,11 +109,12 @@ public partial class BudgetPlanningViewModel : BaseViewModel
             });
 
             SuccessMessage = "Categoria de orçamento criada com sucesso.";
+            IsBusy = false;
             await LoadOverviewAsync();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = "Não foi possível criar a categoria agora. Revise os dados e tente novamente.";
         }
         finally
         {
@@ -141,6 +142,7 @@ public partial class BudgetPlanningViewModel : BaseViewModel
 
         IsBusy = true;
         ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
 
         try
         {
@@ -186,9 +188,10 @@ public partial class BudgetPlanningViewModel : BaseViewModel
             Snapshots = overview.Snapshots;
             PeriodChartLines = BuildChartLines(overview.PeriodSummaries);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            ErrorMessage = ex.Message;
+            SuccessMessage = string.Empty;
+            ErrorMessage = "Não foi possível carregar o dashboard financeiro agora. Tente novamente em instantes.";
         }
         finally
         {

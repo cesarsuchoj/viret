@@ -21,6 +21,12 @@ public partial class MainViewModel : BaseViewModel
     [ObservableProperty]
     private string _familyIdText = string.Empty;
 
+    [ObservableProperty]
+    private string _errorMessage = string.Empty;
+
+    [ObservableProperty]
+    private string _successMessage = string.Empty;
+
     public MainViewModel(ITransactionService transactionService)
     {
         _transactionService = transactionService;
@@ -33,11 +39,29 @@ public partial class MainViewModel : BaseViewModel
         if (IsBusy)
             return;
 
+        if (FamilyId <= 0)
+        {
+            SuccessMessage = string.Empty;
+            ErrorMessage = "Informe um ID de família válido para atualizar os dados.";
+            return;
+        }
+
         IsBusy = true;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
         try
         {
-            Transactions = await _transactionService.GetTransactionsByFamilyAsync(FamilyId);
-            Balance = await _transactionService.GetBalanceAsync(FamilyId);
+            var transactions = await _transactionService.GetTransactionsByFamilyAsync(FamilyId);
+            var balance = await _transactionService.GetBalanceAsync(FamilyId);
+
+            Transactions = transactions;
+            Balance = balance;
+            SuccessMessage = "Dados financeiros atualizados com sucesso.";
+        }
+        catch (Exception)
+        {
+            SuccessMessage = string.Empty;
+            ErrorMessage = "Não foi possível atualizar os dados agora. Tente novamente em instantes.";
         }
         finally
         {
