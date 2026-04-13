@@ -11,17 +11,44 @@ public class RegisterPage : ContentPage
         BindingContext = viewModel;
         SetBinding(TitleProperty, new Binding(nameof(RegisterViewModel.Title)));
 
-        var nameEntry = new Entry { Placeholder = "Nome" };
+        var nameEntry = new Entry { Placeholder = "Nome", ReturnType = ReturnType.Next, TabIndex = 0, IsTabStop = true };
         nameEntry.SetBinding(Entry.TextProperty, nameof(RegisterViewModel.Name));
 
-        var emailEntry = new Entry { Placeholder = "E-mail", Keyboard = Keyboard.Email };
+        var emailEntry = new Entry { Placeholder = "E-mail", Keyboard = Keyboard.Email, ReturnType = ReturnType.Next, TabIndex = 1, IsTabStop = true };
         emailEntry.SetBinding(Entry.TextProperty, nameof(RegisterViewModel.Email));
 
-        var passwordEntry = new Entry { Placeholder = "Senha", IsPassword = true };
+        var passwordEntry = new Entry { Placeholder = "Senha", IsPassword = true, ReturnType = ReturnType.Done, TabIndex = 2, IsTabStop = true };
         passwordEntry.SetBinding(Entry.TextProperty, nameof(RegisterViewModel.Password));
 
-        var registerButton = new Button { Text = "Criar conta" };
+        var registerButton = new Button { Text = "Criar conta", TabIndex = 3, IsTabStop = true };
         registerButton.SetBinding(Button.CommandProperty, nameof(RegisterViewModel.RegisterCommand));
+
+        nameEntry.Completed += (_, _) => emailEntry.Focus();
+        emailEntry.Completed += (_, _) => passwordEntry.Focus();
+        passwordEntry.Completed += async (_, _) => await viewModel.RegisterCommand.ExecuteAsync(null);
+
+        Loaded += (_, _) =>
+        {
+            if (string.IsNullOrWhiteSpace(viewModel.Name))
+            {
+                nameEntry.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(viewModel.Email))
+            {
+                emailEntry.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(viewModel.Password))
+            {
+                passwordEntry.Focus();
+                return;
+            }
+
+            registerButton.Focus();
+        };
 
         var errorLabel = new Label { TextColor = Colors.Red };
         errorLabel.SetBinding(Label.TextProperty, nameof(RegisterViewModel.ErrorMessage));

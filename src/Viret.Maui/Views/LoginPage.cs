@@ -15,14 +15,15 @@ public class LoginPage : ContentPage
         BindingContext = viewModel;
         SetBinding(TitleProperty, new Binding(nameof(LoginViewModel.Title)));
 
-        var emailEntry = new Entry { Placeholder = "E-mail", Keyboard = Keyboard.Email };
+        var emailEntry = new Entry { Placeholder = "E-mail", Keyboard = Keyboard.Email, ReturnType = ReturnType.Next, TabIndex = 0, IsTabStop = true };
         emailEntry.SetBinding(Entry.TextProperty, nameof(LoginViewModel.Email));
 
-        var passwordEntry = new Entry { Placeholder = "Senha", IsPassword = true };
+        var passwordEntry = new Entry { Placeholder = "Senha", IsPassword = true, ReturnType = ReturnType.Go, TabIndex = 1, IsTabStop = true };
         passwordEntry.SetBinding(Entry.TextProperty, nameof(LoginViewModel.Password));
 
-        var loginButton = new Button { Text = "Entrar" };
-        loginButton.Clicked += async (_, _) =>
+        var loginButton = new Button { Text = "Entrar", TabIndex = 2, IsTabStop = true };
+
+        async Task ExecuteLoginAsync()
         {
             await viewModel.LoginCommand.ExecuteAsync(null);
 
@@ -39,10 +40,31 @@ public class LoginPage : ContentPage
                 Application.Current.MainPage = appShell;
                 await appShell.GoToAsync("//dashboard");
             }
-        };
+        }
 
-        var registerButton = new Button { Text = "Criar conta" };
+        emailEntry.Completed += (_, _) => passwordEntry.Focus();
+        passwordEntry.Completed += async (_, _) => await ExecuteLoginAsync();
+        loginButton.Clicked += async (_, _) => await ExecuteLoginAsync();
+
+        var registerButton = new Button { Text = "Criar conta", TabIndex = 3, IsTabStop = true };
         registerButton.Clicked += async (_, _) => await Navigation.PushAsync(registerPage);
+
+        Loaded += (_, _) =>
+        {
+            if (string.IsNullOrWhiteSpace(viewModel.Email))
+            {
+                emailEntry.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(viewModel.Password))
+            {
+                passwordEntry.Focus();
+                return;
+            }
+
+            loginButton.Focus();
+        };
 
         var loadingIndicator = new ActivityIndicator();
         loadingIndicator.SetBinding(ActivityIndicator.IsRunningProperty, nameof(LoginViewModel.IsBusy));
