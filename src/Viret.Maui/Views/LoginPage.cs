@@ -9,6 +9,7 @@ namespace Viret.Maui.Views;
 public class LoginPage : ContentPage
 {
     private readonly IServiceProvider _serviceProvider;
+    private int _registerNavigationInProgress;
 
     public LoginPage(LoginViewModel viewModel, IServiceProvider serviceProvider)
     {
@@ -48,10 +49,9 @@ public class LoginPage : ContentPage
         loginButton.Clicked += async (_, _) => await ExecuteLoginAsync();
 
         var registerButton = new Button { Text = "Criar conta", TabIndex = 3, IsTabStop = true };
-        var registerNavigationInProgress = 0;
         registerButton.Clicked += async (_, _) =>
         {
-            if (Interlocked.Exchange(ref registerNavigationInProgress, 1) == 1)
+            if (Interlocked.Exchange(ref _registerNavigationInProgress, 1) == 1)
             {
                 return;
             }
@@ -72,7 +72,7 @@ public class LoginPage : ContentPage
             finally
             {
                 registerButton.IsEnabled = true;
-                Interlocked.Exchange(ref registerNavigationInProgress, 0);
+                Interlocked.Exchange(ref _registerNavigationInProgress, 0);
             }
         };
 
