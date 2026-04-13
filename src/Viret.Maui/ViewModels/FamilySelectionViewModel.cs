@@ -29,6 +29,9 @@ public partial class FamilySelectionViewModel : BaseViewModel
     private string _errorMessage = string.Empty;
 
     [ObservableProperty]
+    private string _successMessage = string.Empty;
+
+    [ObservableProperty]
     private string _newFamilyName = string.Empty;
 
     [ObservableProperty]
@@ -52,6 +55,7 @@ public partial class FamilySelectionViewModel : BaseViewModel
 
         if (!TryParseUserId(out var parsedUserId))
         {
+            SuccessMessage = string.Empty;
             ErrorMessage = "Informe um ID de usuário válido.";
             Families = Enumerable.Empty<Family>();
             return;
@@ -59,6 +63,7 @@ public partial class FamilySelectionViewModel : BaseViewModel
 
         IsBusy = true;
         ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
 
         try
         {
@@ -69,10 +74,12 @@ public partial class FamilySelectionViewModel : BaseViewModel
 
             if (ShowCreateFamilyOption)
                 ErrorMessage = "Você ainda não participa de nenhuma família. Crie uma nova.";
+            else
+                SuccessMessage = "Famílias carregadas com sucesso.";
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = "Não foi possível carregar as famílias agora. Tente novamente em instantes.";
             ShowCreateFamilyOption = false;
         }
         finally
@@ -90,6 +97,7 @@ public partial class FamilySelectionViewModel : BaseViewModel
         if (!TryParseUserId(out var parsedUserId))
         {
             HasAccessToSelectedFamily = false;
+            SuccessMessage = string.Empty;
             ErrorMessage = "Informe um ID de usuário válido.";
             return;
         }
@@ -97,12 +105,14 @@ public partial class FamilySelectionViewModel : BaseViewModel
         if (SelectedFamily is null)
         {
             HasAccessToSelectedFamily = false;
+            SuccessMessage = string.Empty;
             ErrorMessage = "Selecione uma família.";
             return;
         }
 
         IsBusy = true;
         ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
 
         try
         {
@@ -111,11 +121,13 @@ public partial class FamilySelectionViewModel : BaseViewModel
 
             if (!HasAccessToSelectedFamily)
                 ErrorMessage = "Sem acesso à família selecionada.";
+            else
+                SuccessMessage = "Acesso à família confirmado.";
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             HasAccessToSelectedFamily = false;
-            ErrorMessage = ex.Message;
+            ErrorMessage = "Não foi possível validar o acesso à família. Tente novamente.";
         }
         finally
         {
@@ -131,18 +143,21 @@ public partial class FamilySelectionViewModel : BaseViewModel
 
         if (!TryParseUserId(out var parsedUserId))
         {
+            SuccessMessage = string.Empty;
             ErrorMessage = "Informe um ID de usuário válido.";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(NewFamilyName))
         {
+            SuccessMessage = string.Empty;
             ErrorMessage = "Informe o nome da nova família.";
             return;
         }
 
         IsBusy = true;
         ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
 
         try
         {
@@ -159,10 +174,11 @@ public partial class FamilySelectionViewModel : BaseViewModel
             SelectedFamily = Families.FirstOrDefault(f => f.Id == family.Id) ?? Families.FirstOrDefault();
             ShowCreateFamilyOption = !Families.Any();
             NewFamilyName = string.Empty;
+            SuccessMessage = "Família criada e vinculada com sucesso.";
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = "Não foi possível criar a família agora. Verifique os dados e tente novamente.";
         }
         finally
         {

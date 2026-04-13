@@ -111,9 +111,9 @@ public partial class IncomeEntryViewModel : BaseViewModel
 
             SuccessMessage = "Ganho registrado com sucesso.";
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = "Não foi possível registrar o ganho agora. Verifique os dados e tente novamente.";
         }
         finally
         {

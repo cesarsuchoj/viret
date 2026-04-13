@@ -1,5 +1,4 @@
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Graphics;
 using Viret.Maui.ViewModels;
 
 namespace Viret.Maui.Views;
@@ -22,6 +21,7 @@ public class RegisterPage : ContentPage
 
         var registerButton = new Button { Text = "Criar conta", TabIndex = 3, IsTabStop = true };
         registerButton.SetBinding(Button.CommandProperty, nameof(RegisterViewModel.RegisterCommand));
+        registerButton.SetBinding(VisualElement.IsEnabledProperty, nameof(RegisterViewModel.IsNotBusy));
 
         nameEntry.Completed += (_, _) => emailEntry.Focus();
         emailEntry.Completed += (_, _) => passwordEntry.Focus();
@@ -50,14 +50,15 @@ public class RegisterPage : ContentPage
             registerButton.Focus();
         };
 
-        var errorLabel = new Label { TextColor = Colors.Red };
-        errorLabel.SetBinding(Label.TextProperty, nameof(RegisterViewModel.ErrorMessage));
+        var loadingFeedback = FeedbackUi.CreateLoadingFeedback();
+        var successLabel = FeedbackUi.CreateSuccessLabel(nameof(RegisterViewModel.SuccessMessage));
+        var errorLabel = FeedbackUi.CreateErrorLabel(nameof(RegisterViewModel.ErrorMessage));
 
         Content = new VerticalStackLayout
         {
             Padding = 24,
             Spacing = 12,
-            Children = { nameEntry, emailEntry, passwordEntry, registerButton, errorLabel }
+            Children = { nameEntry, emailEntry, passwordEntry, registerButton, loadingFeedback, successLabel, errorLabel }
         };
     }
 }

@@ -52,9 +52,9 @@ public partial class LoginViewModel : BaseViewModel
         {
             ErrorMessage = "E-mail ou senha inválidos.";
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = "Não foi possível entrar no momento. Tente novamente em instantes.";
         }
         finally
         {

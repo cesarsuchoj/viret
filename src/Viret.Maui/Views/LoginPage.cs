@@ -1,5 +1,4 @@
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Graphics;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading;
 using Viret.Maui.ViewModels;
@@ -24,6 +23,7 @@ public class LoginPage : ContentPage
         passwordEntry.SetBinding(Entry.TextProperty, nameof(LoginViewModel.Password));
 
         var loginButton = new Button { Text = "Entrar", TabIndex = 2, IsTabStop = true };
+        loginButton.SetBinding(VisualElement.IsEnabledProperty, nameof(LoginViewModel.IsNotBusy));
 
         async Task ExecuteLoginAsync()
         {
@@ -49,6 +49,7 @@ public class LoginPage : ContentPage
         loginButton.Clicked += async (_, _) => await ExecuteLoginAsync();
 
         var registerButton = new Button { Text = "Criar conta", TabIndex = 3, IsTabStop = true };
+        registerButton.SetBinding(VisualElement.IsEnabledProperty, nameof(LoginViewModel.IsNotBusy));
         registerButton.Clicked += async (_, _) =>
         {
             if (Interlocked.Exchange(ref _registerNavigationInProgress, 1) == 1)
@@ -93,18 +94,14 @@ public class LoginPage : ContentPage
             loginButton.Focus();
         };
 
-        var loadingIndicator = new ActivityIndicator();
-        loadingIndicator.SetBinding(ActivityIndicator.IsRunningProperty, nameof(LoginViewModel.IsBusy));
-        loadingIndicator.SetBinding(ActivityIndicator.IsVisibleProperty, nameof(LoginViewModel.IsBusy));
-
-        var errorLabel = new Label { TextColor = Colors.Red };
-        errorLabel.SetBinding(Label.TextProperty, nameof(LoginViewModel.ErrorMessage));
+        var loadingFeedback = FeedbackUi.CreateLoadingFeedback();
+        var errorLabel = FeedbackUi.CreateErrorLabel(nameof(LoginViewModel.ErrorMessage));
 
         Content = new VerticalStackLayout
         {
             Padding = 24,
             Spacing = 12,
-            Children = { emailEntry, passwordEntry, loginButton, registerButton, loadingIndicator, errorLabel }
+            Children = { emailEntry, passwordEntry, loginButton, registerButton, loadingFeedback, errorLabel }
         };
     }
 }
