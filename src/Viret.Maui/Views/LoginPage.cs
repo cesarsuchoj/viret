@@ -1,13 +1,17 @@
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
+using Microsoft.Extensions.DependencyInjection;
 using Viret.Maui.ViewModels;
 
 namespace Viret.Maui.Views;
 
 public class LoginPage : ContentPage
 {
-    public LoginPage(LoginViewModel viewModel, RegisterPage registerPage, AppShell appShell)
+    private readonly IServiceProvider _serviceProvider;
+
+    public LoginPage(LoginViewModel viewModel, RegisterPage registerPage, IServiceProvider serviceProvider)
     {
+        _serviceProvider = serviceProvider;
         BindingContext = viewModel;
         SetBinding(TitleProperty, new Binding(nameof(LoginViewModel.Title)));
 
@@ -24,6 +28,7 @@ public class LoginPage : ContentPage
 
             if (viewModel.AuthenticatedUserId is int userId)
             {
+                var appShell = _serviceProvider.GetRequiredService<AppShell>();
                 appShell.SetCurrentUser(userId);
                 if (Application.Current is null)
                 {
