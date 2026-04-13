@@ -6,7 +6,7 @@ namespace Viret.Maui.Views;
 
 public class LoginPage : ContentPage
 {
-    public LoginPage(LoginViewModel viewModel, RegisterPage registerPage, FamilySelectionPage familySelectionPage)
+    public LoginPage(LoginViewModel viewModel, RegisterPage registerPage, AppShell appShell)
     {
         BindingContext = viewModel;
         SetBinding(TitleProperty, new Binding(nameof(LoginViewModel.Title)));
@@ -24,10 +24,9 @@ public class LoginPage : ContentPage
 
             if (viewModel.AuthenticatedUserId is int userId)
             {
-                if (familySelectionPage.BindingContext is FamilySelectionViewModel familySelectionViewModel)
-                    familySelectionViewModel.UserIdText = userId.ToString();
-
-                await Navigation.PushAsync(familySelectionPage);
+                appShell.SetCurrentUser(userId);
+                Application.Current!.MainPage = appShell;
+                await appShell.GoToAsync("//dashboard");
             }
         };
 
