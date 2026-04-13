@@ -1,6 +1,7 @@
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading;
 using Viret.Maui.ViewModels;
 
 namespace Viret.Maui.Views;
@@ -47,26 +48,31 @@ public class LoginPage : ContentPage
         loginButton.Clicked += async (_, _) => await ExecuteLoginAsync();
 
         var registerButton = new Button { Text = "Criar conta", TabIndex = 3, IsTabStop = true };
-        var isNavigatingToRegister = false;
+        var registerNavigationInProgress = 0;
         registerButton.Clicked += async (_, _) =>
         {
-            if (isNavigatingToRegister)
+            if (Interlocked.Exchange(ref registerNavigationInProgress, 1) == 1)
             {
                 return;
             }
 
-            isNavigatingToRegister = true;
             registerButton.IsEnabled = false;
 
             try
             {
-                var registerPage = _serviceProvider.GetRequiredService<RegisterPage>();
+                var registerPage = _serviceProvider.GetService<RegisterPage>();
+                if (registerPage is null)
+                {
+                    await DisplayAlert("Erro", "Não foi possível abrir a tela de cadastro.", "OK");
+                    return;
+                }
+
                 await Navigation.PushAsync(registerPage);
             }
             finally
             {
                 registerButton.IsEnabled = true;
-                isNavigatingToRegister = false;
+                Interlocked.Exchange(ref registerNavigationInProgress, 0);
             }
         };
 
