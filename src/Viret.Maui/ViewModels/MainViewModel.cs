@@ -57,6 +57,7 @@ public partial class MainViewModel : BaseViewModel
         }
         catch (Exception)
         {
+            SuccessMessage = string.Empty;
             ErrorMessage = "Não foi possível atualizar os dados agora. Tente novamente em instantes.";
         }
         finally
