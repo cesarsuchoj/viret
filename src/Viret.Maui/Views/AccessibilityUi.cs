@@ -170,7 +170,6 @@ internal static class AccessibilityUi
         {
             case Label label:
                 label.FontSize = GetScaledFontSize(label, label.FontSize, NamedSize.Body, scale);
-                label.LineBreakMode = LineBreakMode.WordWrap;
                 break;
             case Button button:
                 button.FontSize = GetScaledFontSize(button, button.FontSize, NamedSize.Body, scale);
