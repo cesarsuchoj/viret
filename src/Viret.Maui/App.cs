@@ -8,5 +8,6 @@ public class App : Application
     public App(LoginPage loginPage)
     {
         MainPage = new NavigationPage(loginPage);
+        AccessibilityUi.ApplyToApplication();
     }
 }

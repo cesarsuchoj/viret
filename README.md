@@ -39,6 +39,22 @@ O **Viret** é uma aplicação multiplataforma desenvolvida com **.NET MAUI** pa
 - **Tab** e **Shift+Tab** seguem a ordem lógica dos campos e botões.
 - **ESC** segue o comportamento padrão do sistema operacional/dispositivo para sair do campo atual ou fechar o teclado, quando disponível.
 
+## Acessibilidade e Boas Práticas UX (WCAG)
+
+Melhorias implementadas nesta entrega:
+
+- **Legibilidade e contraste:** ajustes nas cores de mensagens de feedback (sucesso, erro e carregamento) para melhor contraste.
+- **Descrições alternativas:** controles interativos (botões, campos e seletores) recebem nomes semânticos para leitores de tela.
+- **Opção de aumentar fonte:** nova preferência em **Configurações** para habilitar fonte ampliada.
+- **Navegação assistiva:** uso de propriedades semânticas para melhorar leitura de mensagens e estados do app.
+- **Responsividade e usabilidade:** páginas de formulário passaram a usar `ScrollView` e áreas interativas mínimas para facilitar uso em diferentes tamanhos de tela.
+
+### Recomendações contínuas
+
+- Validar periodicamente com leitores de tela (TalkBack/VoiceOver/Narrador).
+- Manter contraste mínimo de texto seguindo WCAG 2.1 (AA).
+- Revisar ordem de foco e navegação por teclado sempre que novas telas forem adicionadas.
+
 ## Stack Tecnológico
 
 | Tecnologia | Uso |

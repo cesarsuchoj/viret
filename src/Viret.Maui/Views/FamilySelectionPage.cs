@@ -65,7 +65,7 @@ public class FamilySelectionPage : ContentPage
         var successLabel = FeedbackUi.CreateSuccessLabel(nameof(FamilySelectionViewModel.SuccessMessage));
         var errorLabel = FeedbackUi.CreateErrorLabel(nameof(FamilySelectionViewModel.ErrorMessage));
 
-        Content = new VerticalStackLayout
+        var content = new VerticalStackLayout
         {
             Padding = 24,
             Spacing = 12,
@@ -75,5 +75,9 @@ public class FamilySelectionPage : ContentPage
                 loadingFeedback, successLabel, accessLabel, errorLabel
             }
         };
+
+        var scrollView = new ScrollView { Content = content };
+        AccessibilityUi.ApplyToView(scrollView);
+        Content = scrollView;
     }
 }

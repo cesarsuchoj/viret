@@ -54,11 +54,15 @@ public class RegisterPage : ContentPage
         var successLabel = FeedbackUi.CreateSuccessLabel(nameof(RegisterViewModel.SuccessMessage));
         var errorLabel = FeedbackUi.CreateErrorLabel(nameof(RegisterViewModel.ErrorMessage));
 
-        Content = new VerticalStackLayout
+        var content = new VerticalStackLayout
         {
             Padding = 24,
             Spacing = 12,
             Children = { nameEntry, emailEntry, passwordEntry, registerButton, loadingFeedback, successLabel, errorLabel }
         };
+
+        var scrollView = new ScrollView { Content = content };
+        AccessibilityUi.ApplyToView(scrollView);
+        Content = scrollView;
     }
 }

@@ -45,7 +45,7 @@ public class IncomeEntryPage : ContentPage
         var successLabel = FeedbackUi.CreateSuccessLabel(nameof(IncomeEntryViewModel.SuccessMessage));
         var errorLabel = FeedbackUi.CreateErrorLabel(nameof(IncomeEntryViewModel.ErrorMessage));
 
-        Content = new ScrollView
+        var content = new ScrollView
         {
             Content = new VerticalStackLayout
             {
@@ -58,5 +58,8 @@ public class IncomeEntryPage : ContentPage
                 }
             }
         };
+
+        AccessibilityUi.ApplyToView(content);
+        Content = content;
     }
 }
