@@ -40,8 +40,17 @@ public class FamilySelectionPage : ContentPage
 
             if (viewModel.HasAccessToSelectedFamily && viewModel.SelectedFamily is not null)
             {
+                var selectedFamilyId = viewModel.SelectedFamily.Id;
+
+                if (Shell.Current is AppShell appShell)
+                {
+                    appShell.SetCurrentFamily(selectedFamilyId);
+                    await appShell.GoToAsync("//dashboard");
+                    return;
+                }
+
                 if (mainPage.BindingContext is MainViewModel mainViewModel)
-                    mainViewModel.FamilyId = viewModel.SelectedFamily.Id;
+                    mainViewModel.FamilyId = selectedFamilyId;
 
                 await Navigation.PushAsync(mainPage);
             }

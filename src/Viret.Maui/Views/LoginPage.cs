@@ -1,13 +1,17 @@
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
+using Microsoft.Extensions.DependencyInjection;
 using Viret.Maui.ViewModels;
 
 namespace Viret.Maui.Views;
 
 public class LoginPage : ContentPage
 {
-    public LoginPage(LoginViewModel viewModel, RegisterPage registerPage, FamilySelectionPage familySelectionPage)
+    private readonly IServiceProvider _serviceProvider;
+
+    public LoginPage(LoginViewModel viewModel, RegisterPage registerPage, IServiceProvider serviceProvider)
     {
+        _serviceProvider = serviceProvider;
         BindingContext = viewModel;
         SetBinding(TitleProperty, new Binding(nameof(LoginViewModel.Title)));
 
@@ -24,10 +28,16 @@ public class LoginPage : ContentPage
 
             if (viewModel.AuthenticatedUserId is int userId)
             {
-                if (familySelectionPage.BindingContext is FamilySelectionViewModel familySelectionViewModel)
-                    familySelectionViewModel.UserIdText = userId.ToString();
+                var appShell = _serviceProvider.GetRequiredService<AppShell>();
+                appShell.SetCurrentUser(userId);
+                if (Application.Current is null)
+                {
+                    await DisplayAlert("Erro", "Não foi possível iniciar o menu principal.", "OK");
+                    return;
+                }
 
-                await Navigation.PushAsync(familySelectionPage);
+                Application.Current.MainPage = appShell;
+                await appShell.GoToAsync("//dashboard");
             }
         };
 

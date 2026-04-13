@@ -19,6 +19,19 @@ O **Viret** é uma aplicação multiplataforma desenvolvida com **.NET MAUI** pa
 - 📈 **Relatórios e dashboards** – visualize sua saúde financeira
 - 🗄️ **Persistência local** – dados armazenados com SQLite no dispositivo
 
+## Navegação
+
+- As telas de **login** e **cadastro** ficam fora do menu principal.
+- Após autenticar, o fluxo principal é: **login → dashboard**.
+- O aplicativo usa um menu central lateral (**Flyout/Drawer**) com acesso rápido a:
+  - Dashboard
+  - Ganhos
+  - Gastos
+  - Famílias
+  - Relatórios
+  - Configurações
+- Ao selecionar uma família na área **Famílias**, o app direciona automaticamente para o **Dashboard** com o contexto da família selecionada.
+
 ## Stack Tecnológico
 
 | Tecnologia | Uso |
