@@ -79,7 +79,6 @@ public class AppShell : Shell
                 new ShellContent
                 {
                     Title = title,
-                    Route = route,
                     Content = page
                 }
             }

@@ -48,7 +48,7 @@ public class FamilySelectionPage : ContentPage
                 if (Shell.Current is AppShell appShell)
                 {
                     appShell.SetCurrentFamily(selectedFamilyId);
-                    await Shell.Current.GoToAsync("//dashboard");
+                    await appShell.GoToAsync("//dashboard");
                     return;
                 }
 

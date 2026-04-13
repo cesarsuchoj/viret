@@ -25,7 +25,10 @@ public class LoginPage : ContentPage
             if (viewModel.AuthenticatedUserId is int userId)
             {
                 appShell.SetCurrentUser(userId);
-                Application.Current!.MainPage = appShell;
+                if (Application.Current is null)
+                    return;
+
+                Application.Current.MainPage = appShell;
                 await appShell.GoToAsync("//dashboard");
             }
         };
