@@ -32,11 +32,13 @@ internal static class FeedbackUi
         };
         loadingLabel.SetBinding(VisualElement.IsVisibleProperty, busyBindingPath);
 
-        return new HorizontalStackLayout
+        var loadingFeedback = new HorizontalStackLayout
         {
             Spacing = 8,
             Children = { indicator, loadingLabel }
         };
+        loadingFeedback.SetBinding(VisualElement.IsVisibleProperty, busyBindingPath);
+        return loadingFeedback;
     }
 
     private static Label CreateMessageLabel(string bindingPath, Color textColor, string icon)

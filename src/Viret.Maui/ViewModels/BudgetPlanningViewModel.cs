@@ -109,6 +109,7 @@ public partial class BudgetPlanningViewModel : BaseViewModel
             });
 
             SuccessMessage = "Categoria de orçamento criada com sucesso.";
+            IsBusy = false;
             await LoadOverviewAsync();
         }
         catch (Exception)
@@ -141,6 +142,7 @@ public partial class BudgetPlanningViewModel : BaseViewModel
 
         IsBusy = true;
         ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
 
         try
         {
@@ -188,6 +190,7 @@ public partial class BudgetPlanningViewModel : BaseViewModel
         }
         catch (Exception)
         {
+            SuccessMessage = string.Empty;
             ErrorMessage = "Não foi possível carregar o dashboard financeiro agora. Tente novamente em instantes.";
         }
         finally
