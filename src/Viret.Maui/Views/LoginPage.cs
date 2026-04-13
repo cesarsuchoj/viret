@@ -9,7 +9,7 @@ public class LoginPage : ContentPage
 {
     private readonly IServiceProvider _serviceProvider;
 
-    public LoginPage(LoginViewModel viewModel, RegisterPage registerPage, IServiceProvider serviceProvider)
+    public LoginPage(LoginViewModel viewModel, IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
         BindingContext = viewModel;
@@ -47,7 +47,28 @@ public class LoginPage : ContentPage
         loginButton.Clicked += async (_, _) => await ExecuteLoginAsync();
 
         var registerButton = new Button { Text = "Criar conta", TabIndex = 3, IsTabStop = true };
-        registerButton.Clicked += async (_, _) => await Navigation.PushAsync(registerPage);
+        var isNavigatingToRegister = false;
+        registerButton.Clicked += async (_, _) =>
+        {
+            if (isNavigatingToRegister)
+            {
+                return;
+            }
+
+            isNavigatingToRegister = true;
+            registerButton.IsEnabled = false;
+
+            try
+            {
+                var registerPage = _serviceProvider.GetRequiredService<RegisterPage>();
+                await Navigation.PushAsync(registerPage);
+            }
+            finally
+            {
+                registerButton.IsEnabled = true;
+                isNavigatingToRegister = false;
+            }
+        };
 
         Loaded += (_, _) =>
         {
