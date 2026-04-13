@@ -32,6 +32,13 @@ O **Viret** é uma aplicação multiplataforma desenvolvida com **.NET MAUI** pa
   - Configurações
 - Ao selecionar uma família na área **Famílias**, o app direciona automaticamente para o **Dashboard** com o contexto da família selecionada.
 
+### Navegação por teclado (login e formulários)
+
+- **Enter** em campos intermediários avança o foco para o próximo campo.
+- **Enter** no campo de senha executa a ação principal da tela (ex.: entrar/criar conta).
+- **Tab** e **Shift+Tab** seguem a ordem lógica dos campos e botões.
+- **ESC** segue o comportamento padrão do sistema operacional/dispositivo para sair do campo atual ou fechar o teclado, quando disponível.
+
 ## Stack Tecnológico
 
 | Tecnologia | Uso |

@@ -1,6 +1,7 @@
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading;
 using Viret.Maui.ViewModels;
 
 namespace Viret.Maui.Views;
@@ -8,21 +9,23 @@ namespace Viret.Maui.Views;
 public class LoginPage : ContentPage
 {
     private readonly IServiceProvider _serviceProvider;
+    private int _registerNavigationInProgress;
 
-    public LoginPage(LoginViewModel viewModel, RegisterPage registerPage, IServiceProvider serviceProvider)
+    public LoginPage(LoginViewModel viewModel, IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
         BindingContext = viewModel;
         SetBinding(TitleProperty, new Binding(nameof(LoginViewModel.Title)));
 
-        var emailEntry = new Entry { Placeholder = "E-mail", Keyboard = Keyboard.Email };
+        var emailEntry = new Entry { Placeholder = "E-mail", Keyboard = Keyboard.Email, ReturnType = ReturnType.Next, TabIndex = 0, IsTabStop = true };
         emailEntry.SetBinding(Entry.TextProperty, nameof(LoginViewModel.Email));
 
-        var passwordEntry = new Entry { Placeholder = "Senha", IsPassword = true };
+        var passwordEntry = new Entry { Placeholder = "Senha", IsPassword = true, ReturnType = ReturnType.Done, TabIndex = 1, IsTabStop = true };
         passwordEntry.SetBinding(Entry.TextProperty, nameof(LoginViewModel.Password));
 
-        var loginButton = new Button { Text = "Entrar" };
-        loginButton.Clicked += async (_, _) =>
+        var loginButton = new Button { Text = "Entrar", TabIndex = 2, IsTabStop = true };
+
+        async Task ExecuteLoginAsync()
         {
             await viewModel.LoginCommand.ExecuteAsync(null);
 
@@ -39,10 +42,56 @@ public class LoginPage : ContentPage
                 Application.Current.MainPage = appShell;
                 await appShell.GoToAsync("//dashboard");
             }
+        }
+
+        emailEntry.Completed += (_, _) => passwordEntry.Focus();
+        passwordEntry.Completed += async (_, _) => await ExecuteLoginAsync();
+        loginButton.Clicked += async (_, _) => await ExecuteLoginAsync();
+
+        var registerButton = new Button { Text = "Criar conta", TabIndex = 3, IsTabStop = true };
+        registerButton.Clicked += async (_, _) =>
+        {
+            if (Interlocked.Exchange(ref _registerNavigationInProgress, 1) == 1)
+            {
+                return;
+            }
+
+            registerButton.IsEnabled = false;
+
+            try
+            {
+                var registerPage = _serviceProvider.GetService<RegisterPage>();
+                if (registerPage is null)
+                {
+                    await DisplayAlert("Erro", "Não foi possível abrir a tela de cadastro.", "OK");
+                    return;
+                }
+
+                await Navigation.PushAsync(registerPage);
+            }
+            finally
+            {
+                registerButton.IsEnabled = true;
+                Interlocked.Exchange(ref _registerNavigationInProgress, 0);
+            }
         };
 
-        var registerButton = new Button { Text = "Criar conta" };
-        registerButton.Clicked += async (_, _) => await Navigation.PushAsync(registerPage);
+        Loaded += (_, _) =>
+        {
+            if (string.IsNullOrWhiteSpace(viewModel.Email))
+            {
+                emailEntry.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(viewModel.Password))
+            {
+                passwordEntry.Focus();
+                return;
+            }
+
+            loginButton.Focus();
+        };
 
         var loadingIndicator = new ActivityIndicator();
         loadingIndicator.SetBinding(ActivityIndicator.IsRunningProperty, nameof(LoginViewModel.IsBusy));
