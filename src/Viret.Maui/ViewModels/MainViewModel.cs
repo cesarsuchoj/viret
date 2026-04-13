@@ -51,8 +51,11 @@ public partial class MainViewModel : BaseViewModel
         SuccessMessage = string.Empty;
         try
         {
-            Transactions = await _transactionService.GetTransactionsByFamilyAsync(FamilyId);
-            Balance = await _transactionService.GetBalanceAsync(FamilyId);
+            var transactions = await _transactionService.GetTransactionsByFamilyAsync(FamilyId);
+            var balance = await _transactionService.GetBalanceAsync(FamilyId);
+
+            Transactions = transactions;
+            Balance = balance;
             SuccessMessage = "Dados financeiros atualizados com sucesso.";
         }
         catch (Exception)
