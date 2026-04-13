@@ -26,7 +26,10 @@ public class LoginPage : ContentPage
             {
                 appShell.SetCurrentUser(userId);
                 if (Application.Current is null)
+                {
+                    await DisplayAlert("Erro", "Não foi possível iniciar o menu principal.", "OK");
                     return;
+                }
 
                 Application.Current.MainPage = appShell;
                 await appShell.GoToAsync("//dashboard");
