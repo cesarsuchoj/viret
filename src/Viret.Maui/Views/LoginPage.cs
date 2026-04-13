@@ -18,7 +18,7 @@ public class LoginPage : ContentPage
         var emailEntry = new Entry { Placeholder = "E-mail", Keyboard = Keyboard.Email, ReturnType = ReturnType.Next, TabIndex = 0, IsTabStop = true };
         emailEntry.SetBinding(Entry.TextProperty, nameof(LoginViewModel.Email));
 
-        var passwordEntry = new Entry { Placeholder = "Senha", IsPassword = true, ReturnType = ReturnType.Go, TabIndex = 1, IsTabStop = true };
+        var passwordEntry = new Entry { Placeholder = "Senha", IsPassword = true, ReturnType = ReturnType.Done, TabIndex = 1, IsTabStop = true };
         passwordEntry.SetBinding(Entry.TextProperty, nameof(LoginViewModel.Password));
 
         var loginButton = new Button { Text = "Entrar", TabIndex = 2, IsTabStop = true };
