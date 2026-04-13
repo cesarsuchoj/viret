@@ -40,6 +40,7 @@ public static class MauiProgram
         builder.Services.AddTransient<IncomeEntryPage>();
         builder.Services.AddTransient<ExpenseEntryPage>();
         builder.Services.AddTransient<BudgetPlanningPage>();
+        builder.Services.AddTransient<MainPage>();
 
         var app = builder.Build();
         app.Services.InitializeViretData();
