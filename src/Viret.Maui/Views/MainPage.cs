@@ -27,7 +27,7 @@ public class MainPage : ContentPage
             var descriptionLabel = new Label { FontAttributes = FontAttributes.Bold };
             descriptionLabel.SetBinding(Label.TextProperty, "Description");
 
-            var metaLabel = new Label { FontSize = 12 };
+            var metaLabel = new Label { FontSize = 14 };
             metaLabel.SetBinding(Label.TextProperty, new MultiBinding
             {
                 StringFormat = "{0:dd/MM/yyyy} | {1} | {2:C}",
@@ -50,11 +50,15 @@ public class MainPage : ContentPage
         var successLabel = FeedbackUi.CreateSuccessLabel(nameof(MainViewModel.SuccessMessage));
         var errorLabel = FeedbackUi.CreateErrorLabel(nameof(MainViewModel.ErrorMessage));
 
-        Content = new VerticalStackLayout
+        var content = new VerticalStackLayout
         {
             Padding = 24,
             Spacing = 12,
             Children = { familyIdEntry, loadButton, loadingFeedback, successLabel, errorLabel, balanceLabel, transactionsView }
         };
+
+        var scrollView = new ScrollView { Content = content };
+        AccessibilityUi.ApplyToView(scrollView);
+        Content = scrollView;
     }
 }

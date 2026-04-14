@@ -173,7 +173,7 @@ public class BudgetPlanningPage : ContentPage
         var successLabel = FeedbackUi.CreateSuccessLabel(nameof(BudgetPlanningViewModel.SuccessMessage));
         var errorLabel = FeedbackUi.CreateErrorLabel(nameof(BudgetPlanningViewModel.ErrorMessage));
 
-        Content = new ScrollView
+        var content = new ScrollView
         {
             Content = new VerticalStackLayout
             {
@@ -189,5 +189,8 @@ public class BudgetPlanningPage : ContentPage
                 }
             }
         };
+
+        AccessibilityUi.ApplyToView(content);
+        Content = content;
     }
 }

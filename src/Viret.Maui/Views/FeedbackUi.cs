@@ -8,15 +8,15 @@ internal static class FeedbackUi
 {
     private static readonly IValueConverter HasTextConverter = new HasTextValueConverter();
 
-    public static readonly Color SuccessColor = Color.FromArgb("#1E8E3E");
-    public static readonly Color ErrorColor = Color.FromArgb("#C62828");
-    public static readonly Color LoadingColor = Color.FromArgb("#1565C0");
+    public static readonly Color SuccessColor = Color.FromArgb("#0B6E2E");
+    public static readonly Color ErrorColor = Color.FromArgb("#B00020");
+    public static readonly Color LoadingColor = Color.FromArgb("#0D47A1");
 
     public static Label CreateSuccessLabel(string bindingPath)
-        => CreateMessageLabel(bindingPath, SuccessColor, "✅");
+        => CreateMessageLabel(bindingPath, SuccessColor, "✅", "Mensagem de sucesso");
 
     public static Label CreateErrorLabel(string bindingPath)
-        => CreateMessageLabel(bindingPath, ErrorColor, "⚠️");
+        => CreateMessageLabel(bindingPath, ErrorColor, "⚠️", "Mensagem de erro");
 
     public static HorizontalStackLayout CreateLoadingFeedback(string busyBindingPath = "IsBusy")
     {
@@ -30,6 +30,7 @@ internal static class FeedbackUi
             TextColor = LoadingColor,
             VerticalTextAlignment = TextAlignment.Center
         };
+        SemanticProperties.SetDescription(loadingLabel, "Processando solicitação");
         loadingLabel.SetBinding(VisualElement.IsVisibleProperty, busyBindingPath);
 
         var loadingFeedback = new HorizontalStackLayout
@@ -41,11 +42,12 @@ internal static class FeedbackUi
         return loadingFeedback;
     }
 
-    private static Label CreateMessageLabel(string bindingPath, Color textColor, string icon)
+    private static Label CreateMessageLabel(string bindingPath, Color textColor, string icon, string semanticDescription)
     {
         var label = new Label { TextColor = textColor, LineBreakMode = LineBreakMode.WordWrap };
         label.SetBinding(Label.TextProperty, new Binding(bindingPath, stringFormat: $"{icon} {{0}}"));
         label.SetBinding(VisualElement.IsVisibleProperty, new Binding(bindingPath, converter: HasTextConverter));
+        SemanticProperties.SetDescription(label, semanticDescription);
         return label;
     }
 

@@ -97,11 +97,15 @@ public class LoginPage : ContentPage
         var loadingFeedback = FeedbackUi.CreateLoadingFeedback();
         var errorLabel = FeedbackUi.CreateErrorLabel(nameof(LoginViewModel.ErrorMessage));
 
-        Content = new VerticalStackLayout
+        var content = new VerticalStackLayout
         {
             Padding = 24,
             Spacing = 12,
             Children = { emailEntry, passwordEntry, loginButton, registerButton, loadingFeedback, errorLabel }
         };
+
+        var scrollView = new ScrollView { Content = content };
+        AccessibilityUi.ApplyToView(scrollView);
+        Content = scrollView;
     }
 }
